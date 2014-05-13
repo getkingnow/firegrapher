@@ -46,8 +46,7 @@
         { "time": 26, "price": 55 },
         { "time": 27, "price": 56 },
         { "time": 28, "price": 58 },
-        { "time": 29, "price": 61 },
-        { "time": 30, "price": 67 }
+        { "time": 29, "price": 61 }
       ],
       "GOOG": [
         { "time": 0, "price": 100 },
