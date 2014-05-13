@@ -1,0 +1,82 @@
+<html>
+	<head>
+		<title>Animated Sparkline using SVG Path and d3.js</title>
+		<script src="http://mbostock.github.com/d3/d3.v2.js"></script>
+		<script type='text/javascript' src='https://cdn.firebase.com/js/client/1.0.15/firebase.js'></script>
+		<style>
+			/* tell the SVG path to be a thin blue line without any area fill */
+			path {
+				stroke: steelblue;
+				stroke-width: 1;
+				fill: none;
+			}
+		</style>
+	</head>
+	<body>
+	
+	<p>
+		<strong>AAPL</strong>
+		<div id="fbgraph1"></div>
+	</p>
+	<script>
+		function displayFirebaseData(
+				graphWidth, graphHeight, 
+				minX, maxX, 
+				minY, maxY,
+				xCoord, yCoord,
+				cssSelector,
+				path
+				) {
+			var data = [];
+			// the ranges are 300 and 30 due to the shape of the graph
+			// x domain is 30 since we have 30 datapoints
+			var x = d3.scale.linear().domain([minX, maxX]).range([0, graphWidth]);
+			// y domain is 50-70 since the prices at the data points are between 50-70
+			var y = d3.scale.linear().domain([minY, maxY]).range([0, graphHeight]);
+
+			var graph = d3.select(cssSelector).append("svg:svg").attr("width", "100%").attr("height", "100%");
+			var line = d3.svg.line()
+				// assign the X function to plot our line as we wish
+				.x(function(d,i) { 
+					// verbose logging to show what's actually being done
+					// console.log('Plotting X value for data point: ' + d + ' using index: ' + i + ' to be at: ' + x(i) + ' using our xScale.');
+					// return the X coordinate where we want to plot this datapoint
+					return x(i); 
+				})
+				.y(function(d,i) { 
+					// verbose logging to show what's actually being done
+					// console.log('Plotting Y value for data point: ' + d + ',' + i + ' to be at: ' + y(d) + " using our yScale.");
+					// return the Y coordinate where we want to plot this datapoint
+					return y(d); 
+				})
+				.interpolate("basis");
+			graph.append("svg:path").attr("d", line(data));
+
+			function draw() {
+				// update with animation
+				graph.selectAll("path")
+					.data([data])
+					.attr("d", line);
+			}
+
+			var dataRef = new Firebase(path);
+			dataRef.on('child_added', function(snapshot) {
+				//data.shift(); // remove the first element of the array
+				data[snapshot.val()[xCoord]] = snapshot.val()[yCoord];
+				draw();
+			});
+		}
+
+		var graphWidth = 800;
+		var graphHeight = 120;
+		var minX = 0, maxX = 30;
+		var minY = 50, maxY = 70;
+		var cssSelector = "#fbgraph1";
+		var path = "https://firegrapherstocks.firebaseio-demo.com/stocks/AAPL";
+		var xCoord = "time";
+		var yCoord = "price";
+		displayFirebaseData(graphWidth, graphHeight, minX, maxX, minY, maxY, xCoord, yCoord, cssSelector, path);
+	</script>
+
+	</body>
+</html>
