@@ -139,7 +139,7 @@
     ]
   });
 
-  fireGrapher.graph("#stockChart2", firebaseRef.child("stocks"), {
+  /*fireGrapher.graph("#stockChart2", firebaseRef.child("stocks"), {
     type : "line",
     path: "*",
     xCoord: {
@@ -151,5 +151,5 @@
       "value" : "price"
     },
     line: "symbol"
-  });
+  });*/
 })();
