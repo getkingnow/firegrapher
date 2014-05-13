@@ -75,3 +75,47 @@
     firebaseRef.chid9”users).on(“child_removed”)
 
     firebaseRef.chid(users).limit(1000).on(“child_changed”)
+
+
+FireGrapher API
+
+// line graph
+FireGrapher.graph("cssSelector", firebase_ref, {
+	type : "line",
+	path: "/relative/to/firebase_ref/$symbol/*",
+	x-coord: {
+		"label" : "Time",
+		"value" : "time"
+	},
+	y-coord: {
+		"label" : "Price",
+		"value" : "price"
+	},
+	line: "$symbol"
+});
+
+// grid
+FireGrapher.graph("cssSelector", firebase_ref, {
+	type : "grid",
+	path : "/relative/to/firebase_ref/$uid",
+	columns : {
+		"First Name" : "firstName",
+		"Last Name" : "lastName",
+		"Paid" : "isPaid",
+		"User ID" : "$uid"
+	}
+});
+
+// scatterplot
+FireGrapher.graph("cssSelector", firebase_ref, {
+	type : "scatter",
+	path: "/relative/to/firebase_ref/*",
+	x-coord: {
+		"label" : "Duration",
+		"value" : "duration"
+	},
+	y-coord: {
+		"label" : "Waiting Time",
+		"value" : "waitingTime"
+	}
+});
