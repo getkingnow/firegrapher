@@ -44,7 +44,7 @@ gulp.task("scripts", function() {
 
   // Output the final concatenated script file
   return stream.done()
-    .pipe(concat("geofire.min.js"))
+    .pipe(concat("FireGrapher.min.js"))
     .pipe(gulp.dest("build"));
 });
 
