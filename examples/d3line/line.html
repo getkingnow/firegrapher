@@ -1,4 +1,5 @@
-d>
+<html>
+	<head>
 		<title>D3 using Firebase</title>
 		<script src="http://cdnjs.cloudflare.com/ajax/libs/d3/2.10.0/d3.v2.min.js"></script>
 		<script type='text/javascript' src='https://cdn.firebase.com/js/client/1.0.15/firebase.js'></script>
@@ -23,31 +24,52 @@ d>
 					cssSelector,
 					path
 					) {
-				var data = [];
+				var data = {};
+				var lines = {};
 				var x = d3.scale.linear().domain([minX, maxX]).range([0, graphWidth]);
 				var y = d3.scale.linear().domain([minY, maxY]).range([0, graphHeight]);
 
 				var graph = d3.select(cssSelector).append("svg:svg").attr("width", "100%").attr("height", "100%");
-				var line = d3.svg.line()
-					.x(function(d,i) {
-						return x(i); 
-					})
-					.y(function(d,i) {
-						return y(d); 
-					})
-					.interpolate("basis");
-				graph.append("svg:path").attr("d", line(data));
 
-				function draw() {
+				function draw(line, lineData) {
 					graph.selectAll("path")
-						.data([data])
+						.data([lineData])
 						.attr("d", line);
+				}
+
+				function addToD3(datapoint){
+					// create a set of data if not exists
+					if (data[datapoint.line] == null || data[datapoint.line] === "undefined") {
+						data[datapoint.line] = [];
+					}
+					// update the data at the datapoint
+					data[datapoint.line][datapoint.x] = datapoint.y;
+					// create a d3 line if not exists
+					var line = lines[datapoint.line];
+					if (line == null || line === "undefined") {
+						line = d3.svg.line()
+							.x(function(d,i) {
+								return x(i); 
+							})
+							.y(function(d,i) {
+								return y(d); 
+							})
+							.interpolate("basis");
+						// if a new line was created, let's add it to the graph
+						graph.append("svg:path").attr("d", line(data[datapoint.line]));
+						lines[datapoint.line] = line;
+					}
+					// update the line with the data
+					draw(line, data[datapoint.line]);
 				}
 
 				var dataRef = new Firebase(path);
 				dataRef.on('child_added', function(snapshot) {
-					data[snapshot.val()[xCoord]] = snapshot.val()[yCoord];
-					draw();
+					addToD3({
+						line : "AAPL",
+						x : snapshot.val()[xCoord],
+						y : snapshot.val()[yCoord]
+					});
 				});
 			}
 
