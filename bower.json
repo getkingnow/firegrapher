@@ -1,0 +1,20 @@
+{
+  "name": "firegrapher",
+  "version": "0.0.0",
+  "main": [
+    "./build/FireGrapher.min.js"
+  ],
+  "ignore": [
+    "gulpfile.js",
+    "firebase.json",
+    "package.json",
+    "tests"
+  ],
+  "dependencies": {
+    "firebase": "~1.0.11",
+    "rsvp": "~3.0.6"
+  },
+  "devDependencies": {
+    "jasmine": "~2.0.0"
+  }
+}

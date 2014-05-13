@@ -1,0 +1,39 @@
+{
+  "name": "firegrapher",
+  "description": "TODO",
+  "main": "build/FireGrapher.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/firebase/TODO.git"
+  },
+  "bugs": {
+    "url": "https://github.com/firebase/TODO/issues"
+  },
+  "private": true,
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "http://firebase.mit-license.org/"
+    }
+  ],
+  "version": "0.0.0",
+  "dependencies": {
+    "firebase": "~1.0.11"
+  },
+  "devDependencies": {
+    "karma": "^0.12.9",
+    "karma-jasmine": "~0.2.0",
+    "karma-script-launcher": "~0.1.0",
+    "karma-firefox-launcher": "~0.1.0",
+    "karma-phantomjs-launcher": "~0.1.0",
+    "karma-chrome-launcher": "~0.1.0",
+    "gulp": "^3.5.6",
+    "gulp-concat": "^2.2.0",
+    "gulp-uglify": "^0.2.1",
+    "gulp-jshint": "^1.5.1",
+    "gulp-ext-replace": "0.0.5",
+    "jshint-stylish": "^0.2.0",
+    "gulp-karma": "0.0.4",
+    "streamqueue": "0.0.5"
+  }
+}
