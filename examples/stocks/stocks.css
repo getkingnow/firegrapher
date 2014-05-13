@@ -1,17 +1,17 @@
 /* tell the SVG path to be a thin blue line without any area fill */
-AAPL {
+#AAPL {
   stroke: red;
   stroke-width: 1;
   fill: none;
 }
 
-MSFT {
+#MSFT {
   stroke: steelblue;
   stroke-width: 1;
   fill: none;
 }
 
-GOOG {
+#GOOG {
   stroke: green;
   stroke-width: 1;
   fill: none;
