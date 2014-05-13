@@ -64,8 +64,8 @@
     }
   });
 
-  var fireGrapher = new FireGrapher();
-  fireGrapher.graph("#stockChart1", firebaseRef.child("stocks"), {
+  var fireGrapher1 = new FireGrapher();
+  fireGrapher1.graph("#stockChart1", firebaseRef.child("stocks"), {
     type : "line",
     path: "$symbol/*",
     xCoord: {
@@ -123,7 +123,6 @@
       { "symbol": "AAPL", "time": 27, "price": 56 },
       { "symbol": "AAPL", "time": 28, "price": 58 },
       { "symbol": "AAPL", "time": 29, "price": 61 },
-      { "symbol": "AAPL", "time": 30, "price": 67 },
       { "symbol": "GOOG", "time": 0, "price": 100 },
       { "symbol": "GOOG", "time": 1, "price": 88.5 },
       { "symbol": "GOOG", "time": 2, "price": 102 },
@@ -138,7 +137,8 @@
     ]
   });
 
-  /*fireGrapher.graph("#stockChart2", firebaseRef.child("stocks"), {
+  var fireGrapher2 = new FireGrapher();
+  fireGrapher2.graph("#stockChart2", firebaseRef.child("stocks2"), {
     type : "line",
     path: "*",
     xCoord: {
@@ -150,5 +150,5 @@
       "value" : "price"
     },
     line: "symbol"
-  });*/
+  });
 })();
