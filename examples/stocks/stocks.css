@@ -1,4 +1,8 @@
 /* tell the SVG path to be a thin blue line without any area fill */
+.graph {
+  height: 150px;
+}
+
 #AAPL {
   stroke: red;
   stroke-width: 1;
