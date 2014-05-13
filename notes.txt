@@ -83,11 +83,11 @@ FireGrapher API
 FireGrapher.graph("cssSelector", firebase_ref, {
 	type : "line",
 	path: "/relative/to/firebase_ref/$symbol/*",
-	x-coord: {
+	xCoord: {
 		"label" : "Time",
 		"value" : "time"
 	},
-	y-coord: {
+	yCoord: {
 		"label" : "Price",
 		"value" : "price"
 	},
@@ -110,11 +110,11 @@ FireGrapher.graph("cssSelector", firebase_ref, {
 FireGrapher.graph("cssSelector", firebase_ref, {
 	type : "scatter",
 	path: "/relative/to/firebase_ref/*",
-	x-coord: {
+	xCoord: {
 		"label" : "Duration",
 		"value" : "duration"
 	},
-	y-coord: {
+	yCoord: {
 		"label" : "Waiting Time",
 		"value" : "waitingTime"
 	}
