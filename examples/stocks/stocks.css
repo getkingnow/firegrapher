@@ -35,3 +35,40 @@ path {
   stroke: black;
   stroke-width: 1.0;
 }
+
+
+/* Table */
+.clearfix:before, .clearfix:after {
+  content: " ";
+  display: table;
+}
+
+.clearfix:after {
+  clear: both;
+}
+
+.clearfix {
+  *zoom: 1;
+}
+
+.table.outer > .row {
+  text-align: center;
+  border-left: solid 3px #000;
+  border-top: solid 3px #000;
+}
+
+.table.outer > .row:last-of-type {
+  border-bottom: solid 3px #000;
+}
+
+.table.outer > .row > * {
+  float: left;
+  width: 100px;
+  border-right: solid 3px black;
+  padding: 5px;
+}
+
+
+.table.outer > .row > .header {
+  font-weight: bold;
+}

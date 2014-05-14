@@ -69,7 +69,7 @@
 
     var fireGrapher2 = new FireGrapher();
     fireGrapher2.graph("#stockChart2", firebaseRef.child("stocks2"), {
-      type : "line",
+      type : "scatter",
       path: "*",
       xCoord: {
         "label" : "Time",
