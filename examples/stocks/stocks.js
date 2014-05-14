@@ -70,11 +70,19 @@
     path: "$symbol/*",
     xCoord: {
       "label" : "Time",
-      "value" : "time"
+      "value" : "time",
+      "min": 0,
+      "max": 30
     },
     yCoord: {
       "label" : "Price",
-      "value" : "price"
+      "value" : "price",
+      "min": 40,
+      "max": 150
+    },
+    graph: {
+      "width": 500,
+      "height": 150
     },
     line: "$symbol"
   });
