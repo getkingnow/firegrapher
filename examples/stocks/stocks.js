@@ -248,11 +248,19 @@
     ]
   });
 
-  var digitalCurrencyFirebaseRef = new Firebase("https://publicdata-cryptocurrency.firebaseio.com/");
+  window.setInterval(function() {
+    var price = Math.ceil(Math.random() * 10) + 50;
+    console.log(price);
+    firebaseRef.child("jacobcoin").set({
+      "bid": price,
+      "ask": price
+    })
+  }, 1000);
+
   var fireGrapher4 = new FireGrapher();
-  fireGrapher4.graph("#digitalCurrencyChart", digitalCurrencyFirebaseRef, {
+  fireGrapher4.graph("#digitalCurrencyChart", firebaseRef, {
     type : "line",
-    path: "bitcoin",
+    path: "jacobcoin",
     xCoord: {
       "label" : "Time",
       "stream" : true,
@@ -262,8 +270,8 @@
     yCoord: {
       "label" : "Price (USD)",
       "value" : "ask",
-      "min": 415,
-      "max": 470
+      "min": 40,
+      "max": 60
     },
     graph: {
       "width": 500,
