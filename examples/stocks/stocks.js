@@ -249,13 +249,13 @@
   });
 
   window.setInterval(function() {
-    var price = Math.ceil(Math.random() * 10) + 50;
+    var price = Math.ceil(Math.random() * 20) + 40;
     console.log(price);
     firebaseRef.child("jacobcoin").set({
       "bid": price,
       "ask": price
     })
-  }, 1000);
+  }, 250);
 
   var fireGrapher4 = new FireGrapher();
   fireGrapher4.graph("#digitalCurrencyChart", firebaseRef, {
@@ -264,8 +264,7 @@
     xCoord: {
       "label" : "Time",
       "stream" : true,
-      "min": 0,
-      "max": 30
+      "limit": 30
     },
     yCoord: {
       "label" : "Price (USD)",
