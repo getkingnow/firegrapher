@@ -21,6 +21,10 @@ path {
   stroke: green;
 }
 
+.YHOO {
+  stroke: orange;
+}
+
 .bitcoin {
   stroke: red;
 }
