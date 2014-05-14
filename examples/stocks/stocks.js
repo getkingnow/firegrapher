@@ -63,7 +63,6 @@
       ]
     }
   });
-this.xCoord.min = 5;
 
   var fireGrapher1 = new FireGrapher();
   fireGrapher1.graph("#stockChart1", firebaseRef.child("stocks"), {
@@ -239,14 +238,13 @@ this.xCoord.min = 5;
   var fireGrapher3 = new FireGrapher();
   fireGrapher3.graph("#userTable", firebaseRef.child("users"), {
     type : "table",
-    path: "$userId/*",
-    columns: {
-      "First Name": "firstName",
-      "Last Name": "lastName",
-      "Email": "email",
-      "Gender": "gender",
-      "Paid User": "isPaid",
-    },
-    columnValues: ["firstName", "lastName", "email", "gender", "isPaid"]
+    path: "$userId6",
+    columns: [
+      { "label": "First Name", "value": "firstName" },
+      { "label": "Last Name", "value": "lastName" },
+      { "label": "Email", "value": "email" },
+      { "label": "Gender", "value": "gender" },
+      { "label": "Is Paid?", "value": "isPaid" }
+    ]
   });
 })();
