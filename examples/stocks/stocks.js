@@ -63,6 +63,7 @@
       ]
     }
   });
+this.xCoord.min = 5;
 
   var fireGrapher1 = new FireGrapher();
   fireGrapher1.graph("#stockChart1", firebaseRef.child("stocks"), {
@@ -158,5 +159,94 @@
       "value" : "price"
     },
     line: "symbol"
+  });
+
+  firebaseRef.update({
+    "users": {
+      "0" : {
+        "firstName": "Jacob",
+        "lastName": "Wenger",
+        "email": "jacob@firebase.com",
+        "gender": "Male",
+        "isPaid": false
+      },
+      "1" : {
+        "firstName": "Tony",
+        "lastName": "Meng",
+        "email": "tony@firebase.com",
+        "gender": "Male",
+        "isPaid": true
+      },
+      "2" : {
+        "firstName": "Al",
+        "lastName": "Coholic",
+        "email": "al@firebase.com",
+        "gender": "Male",
+        "isPaid": true
+      },
+      "3" : {
+        "firstName": "Anne",
+        "lastName": "Teak",
+        "email": "anne@firebase.com",
+        "gender": "Female",
+        "isPaid": false
+      },
+      "4" : {
+        "firstName": "Portia",
+        "lastName": "Johns",
+        "email": "portia@firebase.com",
+        "gender": "Female",
+        "isPaid": false
+      },
+      "5" : {
+        "firstName": "Stan",
+        "lastName": "Francisco",
+        "email": "stan@firebase.com",
+        "gender": "Male",
+        "isPaid": true
+      },
+      "6" : {
+        "firstName": "Paulie",
+        "lastName": "Exclusion",
+        "email": "paulie@firebase.com",
+        "gender": "Male",
+        "isPaid": false
+      },
+      "7" : {
+        "firstName": "Jeff",
+        "lastName": "Jefferson",
+        "email": "jeff@firebase.com",
+        "gender": "Male",
+        "isPaid": true
+      },
+      "8" : {
+        "firstName": "Mary",
+        "lastName": "Annette",
+        "email": "mary@firebase.com",
+        "gender": "Female",
+        "isPaid": true
+      },
+      "9" : {
+        "firstName": "Firebase",
+        "lastName": "Williams",
+        "email": "firebase@firebase.com",
+        "gender": "Male",
+        "isPaid": false
+      }
+    }
+  });
+
+  var fireGrapher3 = new FireGrapher();
+  fireGrapher3.graph("#userTable", firebaseRef.child("users"), {
+    type : "table",
+    path: "$userId/*",
+    columns: {
+      "First Name": "firstName",
+      "Last Name": "lastName",
+      "Email": "email",
+      "Gender": "gender",
+      "Paid User": "isPaid",
+    },
+    columnValues: ["firstName", "lastName", "email", "gender", "isPaid"]
   });
 })();
