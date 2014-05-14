@@ -162,11 +162,11 @@
       type : "table",
       path: "$userId6",
       columns: [
-        { "label": "First Name", "value": "firstName" },
-        { "label": "Last Name", "value": "lastName" },
-        { "label": "Email", "value": "email" },
-        { "label": "Gender", "value": "gender" },
-        { "label": "Is Paid?", "value": "isPaid" }
+        { "label": "First Name", "value": "firstName", "width" : "50" },
+        { "label": "Last Name", "value": "lastName", "width" : "50" },
+        { "label": "Email", "value": "email", "width" : "80"  },
+        { "label": "Gender", "value": "gender", "width" : "30" },
+        { "label": "Is Paid?", "value": "isPaid", "width" : "20" }
       ]
     });
 
