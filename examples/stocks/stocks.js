@@ -247,4 +247,28 @@
       { "label": "Is Paid?", "value": "isPaid" }
     ]
   });
+
+  var digitalCurrencyFirebaseRef = new Firebase("https://publicdata-cryptocurrency.firebaseio.com/");
+  var fireGrapher4 = new FireGrapher();
+  fireGrapher4.graph("#digitalCurrencyChart", digitalCurrencyFirebaseRef, {
+    type : "line",
+    path: "bitcoin",
+    xCoord: {
+      "label" : "Time",
+      "stream" : true,
+      "min": 0,
+      "max": 30
+    },
+    yCoord: {
+      "label" : "Price (USD)",
+      "value" : "ask",
+      "min": 415,
+      "max": 470
+    },
+    graph: {
+      "width": 500,
+      "height": 150
+    },
+    line: "$currency"
+  });
 })();
