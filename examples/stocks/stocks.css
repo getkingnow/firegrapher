@@ -3,35 +3,25 @@
   height: 200px;
 }
 
-#AAPL {
+path {
+  stroke-width: 1;
+  fill: none;
+}
+
+.AAPL {
   stroke: red;
-  stroke-width: 1;
-  fill: none;
 }
 
-#MSFT {
+.MSFT {
   stroke: blue;
-  stroke-width: 1;
-  fill: none;
 }
 
-#GOOG {
+.GOOG {
   stroke: green;
-  stroke-width: 1;
-  fill: none;
 }
 
 .axis {
   shape-rendering: crispEdges;
-}
-
-.x.axis line, .x.axis path {
-  fill: none;
-  stroke: black;
-  stroke-width: 1.0;
-}
-
-.y.axis line, .y.axis path {
   fill: none;
   stroke: black;
   stroke-width: 1.0;
