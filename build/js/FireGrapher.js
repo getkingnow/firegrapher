@@ -25,7 +25,7 @@ FireGrapher.prototype.setDefaultConfig = function() {
     case "scatter":
       this.config.graph = (this.config.graph) ? this.config.graph : {};
       this.config.graph.width = (this.config.graph.width) ? this.config.graph.width : 500;
-      this.config.graph.height = (this.config.graph.height) ? this.config.graph.height : 150;
+      this.config.graph.height = (this.config.graph.height) ? this.config.graph.height : 300;
       this.config.xCoord.min = (this.config.xCoord.min) ? this.config.xCoord.min : 0;
       this.config.xCoord.max = (this.config.xCoord.max) ? this.config.xCoord.max : 50;
       this.config.yCoord.min = (this.config.yCoord.min) ? this.config.yCoord.min : 0;
@@ -312,7 +312,7 @@ FireGrapher.prototype.drawLine = function(seriesIndex, dataPoints) {
     .interpolate("linear");
   // if line does not already exist, add a new one
   if (this.graph.selectAll("path.series" + seriesIndex)[0].length === 0) {
-    this.graph.append("path").attr("class", "series" + seriesIndex);
+    this.graph.append("path").attr("class", "series series" + seriesIndex);
   }
   // update the line with the data
   this.graph.select("path.series" + seriesIndex)
@@ -324,7 +324,7 @@ FireGrapher.prototype.drawDataPoints = function(seriesIndex, dataPoints) {
   this.graph.selectAll("circle.series" + seriesIndex)
     .data(dataPoints).enter()
       .append("circle")
-        .attr("class", "series" + seriesIndex)
+        .attr("class", "dataPoint series" + seriesIndex)
         .attr("cx", function(dataPoint) {
           return this.xScale(dataPoint.xCoord);
         }.bind(this))
@@ -341,6 +341,7 @@ FireGrapher.prototype.drawScales = function() {
   d3.select(this.cssSelector + " svg").remove();
   this.graph = d3.select(this.cssSelector)
     .append("svg:svg")
+      .attr("class", this.config.type)
       .attr("width", "100%")
       .attr("height", "100%");
 
@@ -398,7 +399,7 @@ FireGrapher.prototype.draw = function() {
     case "table":
       this.tableRows = [];
       this.table = d3.select(this.cssSelector)
-        .append("div")  
+        .append("div")
           .attr("class", "table");
       this.addHeaders(this.config.columns);
       break;
