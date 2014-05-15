@@ -176,7 +176,7 @@
         "bid": price,
         "ask": price
       })
-    }, 100);
+    }, 5000);
 
     var fireGrapher4 = new FireGrapher();
     fireGrapher4.graph("#jacobcoinChart", firebaseRef, {

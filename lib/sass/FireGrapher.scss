@@ -1,53 +1,50 @@
 /************/
 /*  COLORS  */
 /************/
-$black: "#000000";
-$gray: "#95A5A6";
-$turquoise: "#1ABC9C";
-$blue: "#3498DB";
-$purple: "#9B59B6";
-$emerald: "#2ECC71";
-$carrot: "#E67E22";
-$red: "#E74C3C";
-$pumpkin: "#D35400";
-$midnightBlue: "#2C3E50";
-$pomegranate: "#C0392B";
+$black: #000000;
+$gray: #95A5A6;
+$turquoise: #1ABC9C;
+$pumpkin: #D35400;
+$red: #E74C3C;
+$blue: #3498DB;
+$emerald: #2ECC71;
+$pomegranate: #C0392B;
+$purple: #9B59B6;
+$sunflower: #F1C40F;
+$carrot: #E67E22;
+$midnightBlue: #2C3E50;
+
+// turquoise, pumpkin, red, blue, emerald, pomegranate, purple, sunflower, carrot, midnight blue
+$seriesColors: $turquoise $red $purple $blue $sunflower $pumpkin $emerald $carrot $midnightBlue $pomegranate;
 
 /************************/
 /*  DEFAULT SVG STYLES  */
 /************************/
 path {
-  stroke: #000;
+  stroke: $black;
   stroke-width: 2;
-  stroke-opacity: 1.0;
+  stroke-opacity: 0.5;
   fill: none;
+
+  @for $seriesIndex from 1 through length($seriesColors) {
+    &.series#{$seriesIndex} {
+      stroke: nth($seriesColors, $seriesIndex);
+    }
+  }
 }
 
 circle {
-  stroke: #000;
+  stroke: $black;
   stroke-width: 2;
-  stroke-opacity: 0.5;
+  stroke-opacity: 1.0;
+  fill-opacity: 1.0;
 
-}
-
-.AAPL {
-  stroke: red;
-}
-
-.MSFT {
-  stroke: blue;
-}
-
-.GOOG {
-  stroke: green;
-}
-
-.YHOO {
-  stroke: orange;
-}
-
-.bitcoin {
-  stroke: red;
+  @for $seriesIndex from 1 through length($seriesColors) {
+    &.series#{$seriesIndex} {
+      stroke: nth($seriesColors, $seriesIndex);
+      fill: nth($seriesColors, $seriesIndex);
+    }
+  }
 }
 
 .axis {

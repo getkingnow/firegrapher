@@ -72,8 +72,11 @@ gulp.task("scripts", function() {
 
 /* Converts sass files to css */
 gulp.task("styles", function () {
-  gulp.src(paths.styles.lib)
-    .pipe(sass({ "outputStyle" : "compressed" }))
+  return gulp.src(paths.styles.lib)
+    .pipe(sass({
+      "outputStyle" : "compressed",
+      "errLogToConsole": true
+    }))
     .pipe(gulp.dest(paths.styles.buildDir));
 });
 
