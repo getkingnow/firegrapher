@@ -121,7 +121,6 @@ FireGrapher.prototype.listenForNewRecords = function(path, eventToListenTo) {
   var lastPathPart = pathParts[pathParts.length - 2];
 
   // TODO: if eventToListenTo is "child_added", we need to also listen to "child_changed" and "child_removed"
-
   switch (this.config.type) {
     case "table":
       this.firebaseRef.child(path).on(eventToListenTo, function(childSnapshot) {
@@ -157,10 +156,7 @@ FireGrapher.prototype.listenForNewRecords = function(path, eventToListenTo) {
       break;
   }
 };
-// ===============
 // Tabling Methods
-// ===============
-
 FireGrapher.prototype.addHeaders = function(columns) {
   // draw header columns
   this.sortColumn = 0;
@@ -220,10 +216,7 @@ FireGrapher.prototype.addDataPointToTable = function(newDataPoint) {
           });
 };
 
-// ================
 // Graphing Methods
-// ================
-
 /**
  * Takes in a min and max for both x and y coordinates and adjusts the scales as necessary
  * @xMinMax is an array of 2 numbers [min, max]
@@ -253,7 +246,6 @@ FireGrapher.prototype.changeScales = function(xMinMax, yMinMax) {
     var yDomain = this.yScale.domain();
     var padding = (yDomain[1] - yDomain[0]) * 0.1;
     this.yScale.domain([yDomain[0] - padding, yDomain[1] + padding]);
-    console.log(padding);
   }
   return changedX || changedY;
 };
@@ -330,9 +322,8 @@ FireGrapher.prototype.drawLine = function(seriesIndex, dataPoints) {
 FireGrapher.prototype.drawDataPoints = function(seriesIndex, dataPoints) {
   this.graph.selectAll("circle.series" + seriesIndex)
     .data(dataPoints).enter()
-<<<<<<< HEAD
     .append("circle")
-      .attr("class", "series" + seriesIndex)
+      .attr("class", "dataPoint series" + seriesIndex)
       .attr("cx", function(dataPoint) {
         return this.xScale(dataPoint.xCoord);
       }.bind(this))
@@ -340,17 +331,6 @@ FireGrapher.prototype.drawDataPoints = function(seriesIndex, dataPoints) {
         return this.yScale(dataPoint.yCoord);
       }.bind(this))
       .attr("r", 3.5);
-=======
-      .append("circle")
-        .attr("class", "dataPoint series" + seriesIndex)
-        .attr("cx", function(dataPoint) {
-          return this.xScale(dataPoint.xCoord);
-        }.bind(this))
-        .attr("cy", function(dataPoint) {
-          return this.yScale(dataPoint.yCoord);
-        }.bind(this))
-        .attr("r", 3.5);
->>>>>>> 21f5267d32753eaed127b80590f6b26c91385248
 };
 
 FireGrapher.prototype.drawScales = function() {
@@ -402,7 +382,7 @@ FireGrapher.prototype.drawScales = function() {
   this.graph
     .append("label")
       .attr("class", "label y")
-      .text("LABEL Y")
+      .text("LABEL Y");
 
   // reload the lines and datapoints
   for (var series in this.graphData) {
@@ -424,9 +404,7 @@ FireGrapher.prototype.drawScales = function() {
   }
 };
 
-// ===============
 // General Methods
-// ===============
 FireGrapher.prototype.draw = function() {
   switch (this.config.type) {
     case "table":
