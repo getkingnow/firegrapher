@@ -151,7 +151,7 @@ FireGrapher.prototype.listenForNewRecords = function(path, eventToListenTo) {
           "series": series,
           "xCoord": xCoord,
           "yCoord": parseInt(data[this.config.yCoord.value])
-        }, this.config.type);
+        });
 
       }.bind(this));
       break;
@@ -182,7 +182,7 @@ FireGrapher.prototype.addDataPointToTable = function(newDataPoint) {
 // Graphing Methods
 // ================
 
-FireGrapher.prototype.addDataPointToGraph = function(newDataPoint, graphType) {
+FireGrapher.prototype.addDataPointToGraph = function(newDataPoint) {
   // if a series doesn't exist, create it
   if (typeof this.graphData[newDataPoint.series] === "undefined") {
     this.graphData[newDataPoint.series] = {
@@ -233,7 +233,7 @@ FireGrapher.prototype.addDataPointToGraph = function(newDataPoint, graphType) {
     this.drawScales();
   } else {
     // if scales haven't changed, go ahead and add the new data point
-    switch (graphType) {
+    switch (this.config.type) {
       case "line":
         this.drawLine(newDataPoint.series, coordinates);
         this.drawDataPoints(newDataPoint.series, coordinates);
@@ -318,8 +318,16 @@ FireGrapher.prototype.drawScales = function() {
   // reload the lines and datapoints
   for (var series in this.graphData) {
     if (this.graphData.hasOwnProperty(series)) {
-      this.drawLine(series, this.graphData[series].coordinates);
-      this.drawDataPoints(series, this.graphData[series].coordinates);
+      // if scales haven't changed, go ahead and add the new data point
+      switch (this.config.type) {
+        case "line":
+          this.drawLine(series, this.graphData[series].coordinates);
+          this.drawDataPoints(series, this.graphData[series].coordinates);
+          break;
+        case "scatter":
+          this.drawDataPoints(series, this.graphData[series].coordinates);
+          break;
+      }
     }
   }
 };
@@ -346,8 +354,12 @@ FireGrapher.prototype.draw = function() {
     case "line":
     case "scatter":
       this.graphData = {};
-      this.xScale = d3.scale.linear().range([0, this.config.graph.width]);
-      this.yScale = d3.scale.linear().range([this.config.graph.height, 0]);
+      this.xScale = d3.scale.linear()
+        .domain([1000000, -1000000]) // wait for first data point to auto-snap
+        .range([0, this.config.graph.width]);
+      this.yScale = d3.scale.linear()
+        .domain([1000000, -1000000]) // wait for first data point to auto-snap
+        .range([this.config.graph.height, 0]);
       break;
   }
 };
