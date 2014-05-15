@@ -51,17 +51,17 @@ path {
   *zoom: 1;
 }
 
-.table.outer > .row {
+.table > .row {
   text-align: center;
   border-left: solid 3px #000;
   border-top: solid 3px #000;
 }
 
-.table.outer > .row:last-of-type {
+.table > .row:last-of-type {
   border-bottom: solid 3px #000;
 }
 
-.table.outer > .row > * {
+.table > .row > * {
   float: left;
   width: 100px;
   border-right: solid 3px black;
@@ -69,6 +69,6 @@ path {
 }
 
 
-.table.outer > .row > .header {
+.table > .row > .header {
   font-weight: bold;
 }
