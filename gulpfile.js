@@ -108,7 +108,7 @@ gulp.task("test", function() {
 
 /* Sets up Browserify */
 gulp.task('browserify', function(){
-  gulp.src('build/*.js')
+  gulp.src(paths.scripts.buildDir + "/*.js")
    .pipe(browserify())
    .pipe(refresh(lrserver));
 });
@@ -128,7 +128,7 @@ gulp.task("watch", function() {
   gulp.watch(["examples/**/*", "build/*.js"], ["browserify"]);
 });
 
-gulp.task("serve", ["scripts", "watch", "server"]);
+gulp.task("serve", ["server", "watch"]);
 
 /* Runs the "test" and "scripts" tasks by default */
 gulp.task("default", ["scripts", "test"]);
