@@ -151,7 +151,7 @@ FireGrapher.prototype.listenForNewRecords = function(path, eventToListenTo) {
           "series": series,
           "xCoord": xCoord,
           "yCoord": parseInt(data[this.config.yCoord.value])
-        }, this.config.type);
+        });
 
       }.bind(this));
       break;
@@ -182,7 +182,35 @@ FireGrapher.prototype.addDataPointToTable = function(newDataPoint) {
 // Graphing Methods
 // ================
 
-FireGrapher.prototype.addDataPointToGraph = function(newDataPoint, graphType) {
+/**
+ * Takes in a min and max for both x and y coordinates and adjusts the scales as necessary
+ * @xMinMax is an array of 2 numbers [min, max]
+ * @yMinMax is an array of 2 numbers [min, max]
+ * @return true if scales were changed
+ */
+FireGrapher.prototype.changeScales = function(xMinMax, yMinMax) {
+  var changed = false;
+  // update the scales based on the new domains
+  if (xMinMax[0] < this.xScale.domain()[0]) {
+    this.xScale.domain([xMinMax[0], this.xScale.domain()[1]]);
+    changed = true;
+  }
+  if (xMinMax[1] > this.xScale.domain()[1]) {
+    this.xScale.domain([this.xScale.domain()[0], xMinMax[1]]);
+    changed = true;
+  }
+  if (yMinMax[0] < this.yScale.domain()[0]) {
+    this.yScale.domain([yMinMax[0] * 0.9, this.yScale.domain()[1]]);
+    changed = true;
+  }
+  if (yMinMax[1] > this.yScale.domain()[1]) {
+    this.yScale.domain([this.yScale.domain()[0], yMinMax[1] * 1.1]);
+    changed = true;
+  }
+  return changed;
+}
+
+FireGrapher.prototype.addDataPointToGraph = function(newDataPoint) {
   // if a series doesn't exist, create it
   if (typeof this.graphData[newDataPoint.series] === "undefined") {
     this.numSeries += 1;
@@ -201,41 +229,24 @@ FireGrapher.prototype.addDataPointToGraph = function(newDataPoint, graphType) {
     // need to sort because x coords are now out of order (so that our line doesn't plot backwards)
     coordinates.sort(function(a, b) { return b.xCoord - a.xCoord; });
   }
-
-  var redrawScales = false;
+  // get the domain with the new coordinate
+  var redrawScales = this.changeScales(
+    d3.extent(coordinates, function(d) { return d.xCoord; }),
+    d3.extent(coordinates, function(d) { return d.yCoord; }));
   // if we're doing a time series, shift the graph accordingly
   if (this.config.xCoord.limit && coordinates.length > this.config.xCoord.limit) {
     coordinates.shift();
-    // reset the domain after shifting all the points
+    // force the domain change after shifting all the points
     this.xScale.domain(d3.extent(coordinates, function(d) { return d.xCoord; }));
     redrawScales = true;
   }
 
-  // update the scales based on the new data's domain
-  var xNewDomain = d3.extent(coordinates, function(d) { return d.xCoord; });
-  var yNewDomain = d3.extent(coordinates, function(d) { return d.yCoord; });
-  if (xNewDomain[0] < this.xScale.domain()[0]) {
-    this.xScale.domain([xNewDomain[0], this.xScale.domain()[1]]);
-    redrawScales = true;
-  }
-  if (xNewDomain[1] > this.xScale.domain()[1]) {
-    this.xScale.domain([this.xScale.domain()[0], xNewDomain[1]]);
-    redrawScales = true;
-  }
-  if (yNewDomain[0] < this.yScale.domain()[0]) {
-    this.yScale.domain([yNewDomain[0], this.yScale.domain()[1]]);
-    redrawScales = true;
-  }
-  if (yNewDomain[1] > this.yScale.domain()[1]) {
-    this.yScale.domain([this.yScale.domain()[0], yNewDomain[1]]);
-    redrawScales = true;
-  }
   if (redrawScales) {
     // if the scales have changed, we will redraw everything with the new data points
     this.drawScales();
   } else {
     // if scales haven't changed, go ahead and add the new data point
-    switch (graphType) {
+    switch (this.config.type) {
       case "line":
         var seriesIndex = this.graphData[newDataPoint.series].seriesIndex;
         this.drawLine(seriesIndex, coordinates);
@@ -323,8 +334,17 @@ FireGrapher.prototype.drawScales = function() {
     if (this.graphData.hasOwnProperty(series)) {
       var seriesIndex = this.graphData[series].seriesIndex;
       var coordinates = this.graphData[series].coordinates;
-      this.drawLine(seriesIndex, coordinates);
-      this.drawDataPoints(seriesIndex, coordinates);
+
+      // if scales haven't changed, go ahead and add the new data point
+      switch (this.config.type) {
+        case "line":
+          this.drawLine(seriesIndex, coordinates);
+          this.drawDataPoints(seriesIndex, coordinates);
+          break;
+        case "scatter":
+          this.drawDataPoints(seriesIndex, coordinates);
+          break;
+      }
     }
   }
 };
@@ -352,8 +372,13 @@ FireGrapher.prototype.draw = function() {
     case "scatter":
       this.graphData = {};
       this.numSeries = 0;
-      this.xScale = d3.scale.linear().range([0, this.config.graph.width]);
-      this.yScale = d3.scale.linear().range([this.config.graph.height, 0]);
+
+      this.xScale = d3.scale.linear()
+        .domain([1000000, -1000000]) // wait for first data point to auto-snap
+        .range([0, this.config.graph.width]);
+      this.yScale = d3.scale.linear()
+        .domain([1000000, -1000000]) // wait for first data point to auto-snap
+        .range([this.config.graph.height, 0]);
       break;
   }
 };

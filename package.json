@@ -35,6 +35,12 @@
     "gulp-ext-replace": "0.0.5",
     "jshint-stylish": "^0.2.0",
     "gulp-karma": "0.0.4",
-    "streamqueue": "0.0.5"
+    "streamqueue": "0.0.5",
+    "connect-livereload": "^0.4.0",
+    "tiny-lr": "0.0.7",
+    "gulp-livereload": "^1.5.0",
+    "gulp-notify": "^1.2.5",
+    "gulp-browserify": "^0.5.0",
+    "express": "^4.2.0"
   }
 }
