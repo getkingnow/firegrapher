@@ -2,22 +2,35 @@
 /*  REQUIRES  */
 /**************/
 var gulp = require("gulp");
-var streamqueue = require("streamqueue");
+var sass = require("gulp-sass");
 var karma = require("gulp-karma");
 var concat = require("gulp-concat");
 var jshint = require("gulp-jshint");
 var uglify = require("gulp-uglify");
+var streamqueue = require("streamqueue");
 
 /****************/
 /*  FILE PATHS  */
 /****************/
 var paths = {
-  scripts: [
-    "lib/FireGrapherParser.js",
-    "lib/FireGrapherD3.js",
-  ],
+  "scripts": {
+    "lib": [
+      "lib/FireGrapherParser.js",
+      "lib/FireGrapherD3.js"
+    ],
+    "unminified": "FireGrapher.js",
+    "minified": "FireGrapher.min.js",
+    "buildDir": "build/js"
+  },
 
-  tests: [
+  "styles": {
+    "lib": [
+      "lib/sass/*.scss"
+    ],
+    "buildDir": "build/css"
+  },
+
+  "tests": [
     "bower_components/firebase/firebase.js",
     "lib/*.js",
     "tests/FireGrapher.spec.js"
@@ -32,29 +45,36 @@ gulp.task("scripts", function() {
   // Concatenate all src files together
   var stream = streamqueue({ objectMode: true });
   stream.queue(gulp.src("lib/header.js"));
-  stream.queue(gulp.src(paths.scripts));
+  stream.queue(gulp.src(paths.scripts.lib));
   stream.queue(gulp.src("lib/footer.js"));
 
   // Output the final concatenated script file
   return stream.done()
     // Rename file
-    .pipe(concat("FireGrapher.js"))
+    .pipe(concat(paths.scripts.unminified))
 
     // Lint
     .pipe(jshint())
     .pipe(jshint.reporter("jshint-stylish"))
 
     // Write un-minified version
-    .pipe(gulp.dest("build"))
+    .pipe(gulp.dest(paths.scripts.buildDir))
 
     // Minify
     .pipe(uglify())
 
     // Rename file
-    .pipe(concat("FireGrapher.min.js"))
+    .pipe(concat(paths.scripts.minified))
 
     // Write minified version
-    .pipe(gulp.dest("build"));
+    .pipe(gulp.dest(paths.scripts.buildDir));
+});
+
+/* Converts sass files to css */
+gulp.task("styles", function () {
+  gulp.src(paths.styles.lib)
+    .pipe(sass({ "outputStyle" : "compressed" }))
+    .pipe(gulp.dest(paths.styles.buildDir));
 });
 
 /* Uses the Karma test runner to run the Jasmine tests */
@@ -71,7 +91,8 @@ gulp.task("test", function() {
 
 /* Re-runs the "scripts" task every time a script file changes */
 gulp.task("watch", function() {
-  gulp.watch(paths.scripts, ["scripts"]);
+  gulp.watch(paths.scripts.lib, ["scripts"]);
+  gulp.watch(paths.styles.lib, ["styles"]);
 });
 
 /* Runs the "test" and "scripts" tasks by default */

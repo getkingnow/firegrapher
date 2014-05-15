@@ -1,12 +1,33 @@
-/* tell the SVG path to be a thin blue line without any area fill */
-.graph {
-  height: 200px;
+/************/
+/*  COLORS  */
+/************/
+$black: "#000000";
+$gray: "#95A5A6";
+$turquoise: "#1ABC9C";
+$blue: "#3498DB";
+$purple: "#9B59B6";
+$emerald: "#2ECC71";
+$carrot: "#E67E22";
+$red: "#E74C3C";
+$pumpkin: "#D35400";
+$midnightBlue: "#2C3E50";
+$pomegranate: "#C0392B";
+
+/************************/
+/*  DEFAULT SVG STYLES  */
+/************************/
+path {
+  stroke: #000;
+  stroke-width: 2;
+  stroke-opacity: 1.0;
+  fill: none;
 }
 
-path {
-  stroke: black;
-  stroke-width: 1;
-  fill: none;
+circle {
+  stroke: #000;
+  stroke-width: 2;
+  stroke-opacity: 0.5;
+
 }
 
 .AAPL {

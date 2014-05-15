@@ -253,7 +253,7 @@ FireGrapher.prototype.drawLine = function(series, dataPoints) {
     .interpolate("linear");
   // if line does not already exist, add a new one
   if (this.graph.selectAll("path."+series)[0].length === 0) {
-    this.graph.append("path").attr("class", series);
+    this.graph.append("path").attr("class", series + " series");
   }
   // update the line with the data
   this.graph.select("path." + series)
@@ -265,7 +265,7 @@ FireGrapher.prototype.drawDataPoints = function(series, dataPoints) {
   this.graph.selectAll("circle." + series)
     .data(dataPoints).enter()
       .append("circle")
-        .attr("class", "dot " + series)
+        .attr("class", series)
         .attr("cx", function(dataPoint) {
           return this.interpolateXCoord(dataPoint.xCoord);
         }.bind(this))
