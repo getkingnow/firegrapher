@@ -123,9 +123,13 @@ gulp.task('server', function() {
 
 /* Re-runs the "scripts" task every time a script file changes */
 gulp.task("watch", function() {
+<<<<<<< HEAD
+  gulp.watch(paths.scripts, ["scripts"]);
+  gulp.watch(["examples/**/*", "build/*.js"], ["browserify"]);
+=======
   gulp.watch(paths.scripts.lib, ["scripts"]);
   gulp.watch(paths.styles.lib, ["styles"]);
-  gulp.watch(["examples/**/*", "build/*.js"], ["browserify"]);
+>>>>>>> d211817a7d4f647f7e23af085253c1b37db76073
 });
 
 gulp.task("serve", ["scripts", "watch", "server"]);
