@@ -29,23 +29,31 @@ var paths = {
 /***********/
 /* Lints, minifies, and concatenates the script files */
 gulp.task("scripts", function() {
-  var code = gulp.src(paths.scripts)
-    // Lint
-    .pipe(jshint())
-    .pipe(jshint.reporter("jshint-stylish"))
-
-    // Minify
-    .pipe(uglify());
-
-  // Wrap code with a header and footer to namespace it
+  // Concatenate all src files together
   var stream = streamqueue({ objectMode: true });
   stream.queue(gulp.src("lib/header.js"));
-  stream.queue(code);
+  stream.queue(gulp.src(paths.scripts));
   stream.queue(gulp.src("lib/footer.js"));
 
   // Output the final concatenated script file
   return stream.done()
+    // Rename file
+    .pipe(concat("FireGrapher.js"))
+
+    // Lint
+    .pipe(jshint())
+    .pipe(jshint.reporter("jshint-stylish"))
+
+    // Write un-minified version
+    .pipe(gulp.dest("build"))
+
+    // Minify
+    .pipe(uglify())
+
+    // Rename file
     .pipe(concat("FireGrapher.min.js"))
+
+    // Write minified version
     .pipe(gulp.dest("build"));
 });
 
