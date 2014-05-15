@@ -161,12 +161,53 @@ FireGrapher.prototype.listenForNewRecords = function(path, eventToListenTo) {
 // Tabling Methods
 // ===============
 
+FireGrapher.prototype.addHeaders = function(columns) {
+  // draw header columns
+  this.sortColumn = 0;
+  this.sortAsc = true;
+  this.table
+    .append("div").attr("class", "row head clearfix")
+    .selectAll("div.header").data(columns).enter()
+      .append("div")
+        .attr("class", "header")
+        .attr("width", function(column) {
+          return column.width;
+        })
+        .text(function (column) { return column.label; })
+        .on("click", function (d) {
+            // update sortColumn to sort on clicked on column
+            var newSortColumn = 0;
+            for (var i = 0; i < columns.length; i++) {
+              if (columns[i] === d) {
+                newSortColumn = i;
+              }
+            }
+            if (this.sortColumn !== newSortColumn) {
+              // change sort column
+              this.sortColumn = newSortColumn;
+              this.sortAsc = true;
+            } else {
+              // change sort type
+              this.sortAsc = !this.sortAsc;
+            }
+            this.table.selectAll("div.data").sort(function(a, b) {
+              if (a[this.sortColumn] === b[this.sortColumn]) {
+                return 0;
+              } else if (this.sortAsc) {
+                return a[this.sortColumn] > b[this.sortColumn];
+              } else {
+                return a[this.sortColumn] < b[this.sortColumn];
+              }
+            }.bind(this));
+        }.bind(this));
+};
+
 FireGrapher.prototype.addDataPointToTable = function(newDataPoint) {
   this.tableRows.push(newDataPoint);
   this.table
     .selectAll("div.row")
       .data(this.tableRows).enter()
-        .append("div").attr("class", "row clearfix")
+        .append("div").attr("class", "row data clearfix")
           .selectAll("div.cell").data(function(d) {
             return d;
           }).enter()
@@ -208,7 +249,7 @@ FireGrapher.prototype.changeScales = function(xMinMax, yMinMax) {
     changed = true;
   }
   return changed;
-}
+};
 
 FireGrapher.prototype.addDataPointToGraph = function(newDataPoint) {
   // if a series doesn't exist, create it
@@ -350,17 +391,10 @@ FireGrapher.prototype.draw = function() {
   switch (this.config.type) {
     case "table":
       this.tableRows = [];
-      this.table = d3.select(this.cssSelector).append("div").attr("class", "table");
-      // draw header columns
-      this.table
-        .append("div").attr("class", "row clearfix")
-        .selectAll("div.header").data(this.config.columns).enter()
-          .append("div")
-            .attr("class", "header")
-            .attr("width", function(column) {
-              return column.width;
-            })
-            .text(function (column) { return column.label; });
+      this.table = d3.select(this.cssSelector)
+        .append("div")  
+          .attr("class", "table");
+      this.addHeaders(this.config.columns);
       break;
     case "line":
     case "scatter":
