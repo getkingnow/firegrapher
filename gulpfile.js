@@ -13,7 +13,8 @@ var uglify = require("gulp-uglify");
 /****************/
 var paths = {
   scripts: [
-    "lib/FireGrapher.js"
+    "lib/FireGrapherParser.js",
+    "lib/FireGrapherD3.js",
   ],
 
   tests: [
@@ -38,9 +39,9 @@ gulp.task("scripts", function() {
 
   // Wrap code with a header and footer to namespace it
   var stream = streamqueue({ objectMode: true });
-  stream.queue(gulp.src("build/header"));
+  stream.queue(gulp.src("lib/header.js"));
   stream.queue(code);
-  stream.queue(gulp.src("build/footer"));
+  stream.queue(gulp.src("lib/footer.js"));
 
   // Output the final concatenated script file
   return stream.done()
