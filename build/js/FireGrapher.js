@@ -151,7 +151,7 @@ FireGrapher.prototype.listenForNewRecords = function(path, eventToListenTo) {
           "series": series,
           "xCoord": xCoord,
           "yCoord": parseInt(data[this.config.yCoord.value])
-        }, this.config.type);
+        });
 
       }.bind(this));
       break;
@@ -182,7 +182,35 @@ FireGrapher.prototype.addDataPointToTable = function(newDataPoint) {
 // Graphing Methods
 // ================
 
-FireGrapher.prototype.addDataPointToGraph = function(newDataPoint, graphType) {
+/**
+ * Takes in a min and max for both x and y coordinates and adjusts the scales as necessary
+ * @xMinMax is an array of 2 numbers [min, max]
+ * @yMinMax is an array of 2 numbers [min, max]
+ * @return true if scales were changed
+ */
+FireGrapher.prototype.changeScales = function(xMinMax, yMinMax) {  
+  var changed = false;
+  // update the scales based on the new domains
+  if (xMinMax[0] < this.xScale.domain()[0]) {
+    this.xScale.domain([xMinMax[0], this.xScale.domain()[1]]);
+    changed = true;
+  }
+  if (xMinMax[1] > this.xScale.domain()[1]) {
+    this.xScale.domain([this.xScale.domain()[0], xMinMax[1]]);
+    changed = true;
+  }
+  if (yMinMax[0] < this.yScale.domain()[0]) {
+    this.yScale.domain([yMinMax[0] * 0.9, this.yScale.domain()[1]]);
+    changed = true;
+  }
+  if (yMinMax[1] > this.yScale.domain()[1]) {
+    this.yScale.domain([this.yScale.domain()[0], yMinMax[1] * 1.1]);
+    changed = true;
+  }
+  return changed;
+}
+
+FireGrapher.prototype.addDataPointToGraph = function(newDataPoint) {
   // if a series doesn't exist, create it
   if (typeof this.graphData[newDataPoint.series] === "undefined") {
     this.graphData[newDataPoint.series] = {
@@ -199,45 +227,32 @@ FireGrapher.prototype.addDataPointToGraph = function(newDataPoint, graphType) {
     // need to sort because x coords are now out of order (so that our line doesn't plot backwards)
     coordinates.sort(function(a, b) { return b.xCoord - a.xCoord; });
   }
-
-  var updateGraph = false;
+  // get the domain with the new coordinate
+  var redrawScales = this.changeScales(
+    d3.extent(coordinates, function(d) { return d.xCoord; }), 
+    d3.extent(coordinates, function(d) { return d.yCoord; }));
   // if we're doing a time series, shift the graph accordingly
   if (this.config.xCoord.limit && coordinates.length > this.config.xCoord.limit) {
     coordinates.shift();
-    this.config.xCoord.min = this.graphData[newDataPoint.series].streamCount - this.config.xCoord.limit;
-    updateGraph = true;
+    // force the domain change after shifting all the points
+    this.xScale.domain(d3.extent(coordinates, function(d) { return d.xCoord; }));
+    redrawScales = true;
   }
 
-  // update graph as necessary
-  if (this.config.xCoord.min > newDataPoint.xCoord) {
-    this.config.xCoord.min = newDataPoint.xCoord;
-    updateGraph = true;
-  }
-  if (this.config.xCoord.max < newDataPoint.xCoord) {
-    this.config.xCoord.max = newDataPoint.xCoord;
-    updateGraph = true;
-  }
-  if (this.config.yCoord.min > newDataPoint.yCoord) {
-    this.config.yCoord.min = newDataPoint.yCoord;
-    updateGraph = true;
-  }
-  if (this.config.yCoord.max < newDataPoint.yCoord) {
-    this.config.yCoord.max = newDataPoint.yCoord;
-    updateGraph = true;
-  }
-  if (updateGraph) {
-    this.drawGraph();
-  }
-
-  // redraw the graph based on new data points
-  switch (graphType) {
-    case "line":
-      this.drawLine(newDataPoint.series, coordinates);
-      this.drawDataPoints(newDataPoint.series, coordinates);
-      break;
-    case "scatter":
-      this.drawDataPoints(newDataPoint.series, coordinates);
-      break;
+  if (redrawScales) {
+    // if the scales have changed, we will redraw everything with the new data points
+    this.drawScales();
+  } else {
+    // if scales haven't changed, go ahead and add the new data point
+    switch (this.config.type) {
+      case "line":
+        this.drawLine(newDataPoint.series, coordinates);
+        this.drawDataPoints(newDataPoint.series, coordinates);
+        break;
+      case "scatter":
+        this.drawDataPoints(newDataPoint.series, coordinates);
+        break;
+    }
   }
 };
 
@@ -245,15 +260,15 @@ FireGrapher.prototype.drawLine = function(series, dataPoints) {
   var line = d3.svg.line()
     .defined(function(d) { return d !== null; })
     .x(function(value) {
-      return this.interpolateXCoord(value.xCoord);
+      return this.xScale(value.xCoord);
     }.bind(this))
     .y(function(value) {
-      return this.interpolateYCoord(value.yCoord);
+      return this.yScale(value.yCoord);
     }.bind(this))
     .interpolate("linear");
   // if line does not already exist, add a new one
   if (this.graph.selectAll("path."+series)[0].length === 0) {
-    this.graph.append("path").attr("class", series);
+    this.graph.append("path").attr("class", series + " series");
   }
   // update the line with the data
   this.graph.select("path." + series)
@@ -265,61 +280,65 @@ FireGrapher.prototype.drawDataPoints = function(series, dataPoints) {
   this.graph.selectAll("circle." + series)
     .data(dataPoints).enter()
       .append("circle")
-        .attr("class", "dot " + series)
+        .attr("class", series)
         .attr("cx", function(dataPoint) {
-          return this.interpolateXCoord(dataPoint.xCoord);
+          return this.xScale(dataPoint.xCoord);
         }.bind(this))
         .attr("cy", function(dataPoint) {
-          return this.interpolateYCoord(dataPoint.yCoord);
+          return this.yScale(dataPoint.yCoord);
         }.bind(this))
         .attr("r", 3.5);
 };
 
 FireGrapher.prototype.drawScales = function() {
-  // removing old scales
-  while (this.graph.select("g").remove()[0][0] !== null) {
-    continue;
-  }
+  // if we need to redraw the scales,
+  // that means everything on it, is not to scale
+  // so we need to redraw the entire graph
+  d3.select(this.cssSelector + " svg").remove();
+  this.graph = d3.select(this.cssSelector)
+    .append("svg:svg")
+      .attr("width", "100%")
+      .attr("height", "100%");
+
+  // set the new axes
+  var xAxis = d3.svg.axis()
+    .scale(this.xScale)
+    .ticks(4)
+    .tickSubdivide(1)
+    .tickSize(-this.config.graph.height, -this.config.graph.height, -50);
+  var yAxis = d3.svg.axis()
+    .orient("left")
+    .scale(this.yScale)
+    .ticks(8)
+    .tickSubdivide(0)
+    .tickSize(-this.config.graph.width, -this.config.graph.width, -50);
 
   // adding new scales
   this.graph.append("g").attr("class", "x axis").attr("transform", "translate(0," + this.config.graph.height + ")")
-    .call(d3.svg.axis()
-      .scale(this.interpolateXCoord)
-      .ticks(4).tickSubdivide(1).tickSize(-this.config.graph.height, -this.config.graph.height, -50))
-    // move the labels to where they can be seen
-    .selectAll("text").attr("y", 15).style("text-anchor", "start");
+    .call(xAxis)
+    .selectAll("text")
+      .attr("y", 15)
+      .style("text-anchor", "start");
   this.graph.append("g").attr("class", "y axis")
-    .call(d3.svg.axis()
-      .orient("left")
-      .scale(this.interpolateYCoord)
-      .ticks(8).tickSubdivide(0).tickSize(-this.config.graph.width, -this.config.graph.width, -50))
-    // move the labels to where they can be seen
-    .selectAll("text").attr("x", 5).attr("y", -10).style("text-anchor", "start");
-};
+    .call(yAxis)
+    .selectAll("text")
+      .attr("x", 5)
+      .attr("y", -10)
+      .style("text-anchor", "start");
 
-FireGrapher.prototype.drawGraph = function() {
-  // updating the interpolations to new scales
-  var paddingY = this.config.yCoord.max * 0.05;
-  this.interpolateXCoord = d3.scale.linear().domain([this.config.xCoord.min, this.config.xCoord.max]).range([0, this.config.graph.width]);
-  this.interpolateYCoord = d3.scale.linear().domain([this.config.yCoord.min - paddingY, this.config.yCoord.max + paddingY]).range([this.config.graph.height, 0]);
-
-  // drawing scales again
-  this.drawScales();
-
-  // removing old lines
-  while (this.graph.select("path").remove()[0][0] !== null) {
-    continue;
-  }
-  // removing old points
-  while (this.graph.select("circle").remove()[0][0] !== null) {
-    continue;
-  }
-
-  // adding lines to new graph
-  for (var key in this.graphData) {
-    if (this.graphData.hasOwnProperty(key)) {
-      this.drawLine(key, this.graphData[key].coordinates);
-      this.drawDataPoints(key, this.graphData[key].coordinates);
+  // reload the lines and datapoints
+  for (var series in this.graphData) {
+    if (this.graphData.hasOwnProperty(series)) {
+      // if scales haven't changed, go ahead and add the new data point
+      switch (this.config.type) {
+        case "line":
+          this.drawLine(series, this.graphData[series].coordinates);
+          this.drawDataPoints(series, this.graphData[series].coordinates);
+          break;
+        case "scatter":
+          this.drawDataPoints(series, this.graphData[series].coordinates);
+          break;
+      }
     }
   }
 };
@@ -346,8 +365,12 @@ FireGrapher.prototype.draw = function() {
     case "line":
     case "scatter":
       this.graphData = {};
-      this.graph = d3.select(this.cssSelector).append("svg:svg").attr("width", "100%").attr("height", "100%");
-      this.drawGraph();
+      this.xScale = d3.scale.linear()
+        .domain([1000000, -1000000]) // wait for first data point to auto-snap
+        .range([0, this.config.graph.width]);
+      this.yScale = d3.scale.linear()
+        .domain([1000000, -1000000]) // wait for first data point to auto-snap
+        .range([this.config.graph.height, 0]);
       break;
   }
 };

@@ -1,0 +1,95 @@
+/************/
+/*  COLORS  */
+/************/
+$black: "#000000";
+$gray: "#95A5A6";
+$turquoise: "#1ABC9C";
+$blue: "#3498DB";
+$purple: "#9B59B6";
+$emerald: "#2ECC71";
+$carrot: "#E67E22";
+$red: "#E74C3C";
+$pumpkin: "#D35400";
+$midnightBlue: "#2C3E50";
+$pomegranate: "#C0392B";
+
+/************************/
+/*  DEFAULT SVG STYLES  */
+/************************/
+path {
+  stroke: #000;
+  stroke-width: 2;
+  stroke-opacity: 1.0;
+  fill: none;
+}
+
+circle {
+  stroke: #000;
+  stroke-width: 2;
+  stroke-opacity: 0.5;
+
+}
+
+.AAPL {
+  stroke: red;
+}
+
+.MSFT {
+  stroke: blue;
+}
+
+.GOOG {
+  stroke: green;
+}
+
+.YHOO {
+  stroke: orange;
+}
+
+.bitcoin {
+  stroke: red;
+}
+
+.axis {
+  shape-rendering: crispEdges;
+  fill: none;
+  stroke: black;
+  stroke-width: 1.0;
+}
+
+
+/* Table */
+.clearfix:before, .clearfix:after {
+  content: " ";
+  display: table;
+}
+
+.clearfix:after {
+  clear: both;
+}
+
+.clearfix {
+  *zoom: 1;
+}
+
+.table > .row {
+  text-align: center;
+  border-left: solid 3px #000;
+  border-top: solid 3px #000;
+}
+
+.table > .row:last-of-type {
+  border-bottom: solid 3px #000;
+}
+
+.table > .row > * {
+  float: left;
+  width: 100px;
+  border-right: solid 3px black;
+  padding: 5px;
+}
+
+
+.table > .row > .header {
+  font-weight: bold;
+}
