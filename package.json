@@ -40,7 +40,6 @@
     "tiny-lr": "0.0.7",
     "gulp-livereload": "^1.5.0",
     "gulp-notify": "^1.2.5",
-    "gulp-browserify": "^0.5.0",
     "express": "^4.2.0"
   }
 }

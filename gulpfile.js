@@ -22,6 +22,7 @@ var serverport = 3000;
 /*  FILE PATHS  */
 /****************/
 var paths = {
+  "buildDir": "build",
   "scripts": {
     "lib": [
       "lib/FireGrapherParser.js",
@@ -110,9 +111,8 @@ gulp.task("test", function() {
 });
 
 /* Sets up Browserify */
-gulp.task('browserify', function(){
-  gulp.src(paths.scripts.buildDir + "/*.js")
-   .pipe(browserify())
+gulp.task('reload', function(){
+  gulp.src(paths.buildDir + "/**/*")
    .pipe(refresh(lrserver));
 });
 
@@ -128,7 +128,7 @@ gulp.task('server', function() {
 gulp.task("watch", function() {
   gulp.watch(paths.scripts.lib, ["scripts"]);
   gulp.watch(paths.styles.lib, ["styles"]);
-  gulp.watch(["examples/**/*", "build/*.js"], ["browserify"]);
+  gulp.watch(["examples/**/*", paths.buildDir + "/**/*"], ["reload"]);
 });
 
 gulp.task("serve", ["server", "watch"]);
