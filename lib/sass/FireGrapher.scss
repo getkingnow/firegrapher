@@ -1,8 +1,12 @@
 /************/
 /*  COLORS  */
 /************/
+// Basic colors
 $black: #000000;
 $gray: #95A5A6;
+
+
+// Series colors
 $turquoise: #1ABC9C;
 $pumpkin: #D35400;
 $red: #E74C3C;
@@ -13,14 +17,20 @@ $purple: #9B59B6;
 $sunflower: #F1C40F;
 $carrot: #E67E22;
 $midnightBlue: #2C3E50;
-
-// turquoise, pumpkin, red, blue, emerald, pomegranate, purple, sunflower, carrot, midnight blue
 $seriesColors: $turquoise $red $purple $blue $sunflower $pumpkin $emerald $carrot $midnightBlue $pomegranate;
 
 /************************/
 /*  DEFAULT SVG STYLES  */
 /************************/
-path {
+svg {
+  &.line, &.scatter {
+    height: 340px;
+    width: 510px;
+    border: solid 1px red;
+  }
+}
+
+.series {
   stroke: $black;
   stroke-width: 2;
   stroke-opacity: 0.5;
@@ -33,7 +43,7 @@ path {
   }
 }
 
-circle {
+.dataPoint {
   stroke: $black;
   stroke-width: 2;
   stroke-opacity: 1.0;
@@ -48,10 +58,18 @@ circle {
 }
 
 .axis {
-  shape-rendering: crispEdges;
+  stroke: $black;
+  stroke-width: 2;
   fill: none;
-  stroke: black;
-  stroke-width: 1.0;
+  shape-rendering: crispEdges;
+
+  &.x {
+
+  }
+
+  &.y {
+
+  }
 }
 
 
