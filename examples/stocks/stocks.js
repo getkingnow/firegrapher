@@ -248,4 +248,16 @@
     },
     series: "$currency"
   });
+
+  var fireGrapher6 = new FireGrapher();
+  fireGrapher6.graph("#stockChart6", firebaseRef.child("stocks"), {
+    type : "bar",
+    path: "$symbol/*",
+    graph: {
+      "width": 500,
+      "height": 150
+    },
+    value : "price",
+    series: "$symbol"
+  });
 })();
