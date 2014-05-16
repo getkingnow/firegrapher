@@ -207,7 +207,7 @@
       "height": 150
     },
     line: "$currency"
-    });
+  });
 
   var currencyRef = new Firebase("https://publicdata-cryptocurrency.firebaseio.com/");
   var fireGrapher5 = new FireGrapher();
