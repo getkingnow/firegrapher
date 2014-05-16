@@ -58,13 +58,16 @@ svg {
       fill: none;
       shape-rendering: crispEdges;
 
-      &.x {
-
+      text {
+        font-size: 14px;
+        fill: $black;
+        stroke: none;
       }
+    }
 
-      &.y {
-
-      }
+    .axisLabel {
+      font-weight: bold;
+      font-size: 18px;
     }
   }
 }
