@@ -91,7 +91,7 @@
       "label" : "Price",
       "value" : "price"
     },
-    graph: {
+    styles: {
       "outerStrokeWidth": 5,
       "innerStrokeWidth": 2,
       "fillColor": "#35FC7A",
@@ -232,9 +232,11 @@
       "min": 40,
       "max": 60
     },
-    graph: {
-      "width": 500,
-      "height": 150,
+    styles: {
+      "size": {
+        "width": 500,
+        "height": 150
+      },
       "markers": {
         "size": 8,
         "strokeColors": ["red"], // TODO: also allow this to be a dictionary of $currency: color?
@@ -266,9 +268,11 @@
       "min": 446,
       "max": 448
     },
-    graph: {
-      "width": 500,
-      "height": 300
+    styles: {
+      "size": {
+        "width": 500,
+        "height": 300
+      }
     },
     series: "$currency"
   });
@@ -283,9 +287,11 @@
     yCoord: {
       "label" : "Price (USD)"
     },
-    graph: {
-      "width": 500,
-      "height": 150
+    styles: {
+      "size": {
+        "width": 500,
+        "height": 150
+      }
     },
     value : "price",
     series: "$symbol"
