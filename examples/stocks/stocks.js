@@ -80,7 +80,7 @@
       "width": 500,
       "height": 150
     },
-    line: "$symbol"
+    series: "$symbol"
   });
 
   var fireGrapher2 = new FireGrapher();
@@ -95,7 +95,13 @@
       "label" : "Price",
       "value" : "price"
     },
-    line: "symbol"
+    graph: {
+      "markers": {
+        "size": 8,
+        "style": "flat"
+      }
+    },
+    series: "symbol"
   });
 
   firebaseRef.update({
@@ -204,9 +210,20 @@
     },
     graph: {
       "width": 500,
-      "height": 150
+      "height": 150,
+      "markers": {
+        "size": 8,
+        "strokeColors": ["red"],
+        "strokeWidth": 5,
+        "fillColors": ["blue"]
+      },
+      "series": {
+        "strokeWidth": 4,
+        "strokeColors": ["yellow"],
+        "fillColors": ["green"]
+      }
     },
-    line: "$currency"
+    series: "$currency"
   });
 
   var currencyRef = new Firebase("https://publicdata-cryptocurrency.firebaseio.com/");
@@ -229,6 +246,6 @@
       "width": 500,
       "height": 300
     },
-    line: "$currency"
+    series: "$currency"
   });
 })();
