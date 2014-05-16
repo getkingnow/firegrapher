@@ -253,6 +253,12 @@
   fireGrapher6.graph("#stockChart6", firebaseRef.child("stocks"), {
     type : "bar",
     path: "$symbol/*",
+    xCoord: {
+      "label" : "Symbols"
+    },
+    yCoord: {
+      "label" : "Price (USD)"
+    },
     graph: {
       "width": 500,
       "height": 150
