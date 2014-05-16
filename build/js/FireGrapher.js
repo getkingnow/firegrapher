@@ -356,11 +356,13 @@ FireGrapher.prototype.drawScales = function() {
   var xAxis = d3.svg.axis()
     .orient("bottom")
     .scale(this.xScale)
-    .ticks(Math.floor(width * 0.035));
+    .ticks(Math.floor(width * 0.035))
+    .tickSize(-height, -height);
   var yAxis = d3.svg.axis()
     .orient("left")
     .scale(this.yScale)
-    .ticks(Math.floor(height * 0.035));
+    .ticks(Math.floor(height * 0.035))
+    .tickSize(-width, -width);
 
   // adding new scales
   this.graph
