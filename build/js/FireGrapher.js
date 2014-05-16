@@ -85,6 +85,9 @@ FireGrapher.prototype.parsePath = function(paths, nodeIndex) {
 
     paths.forEach(function(path) {
       this.listenForNewRecords(path, eventToListenTo);
+      if (eventToListenTo === "child_added") {
+        this.listenForRemovedRecords(path);
+      }
     }.bind(this));
   }
   else {
@@ -129,6 +132,7 @@ FireGrapher.prototype.listenForNewRecords = function(path, eventToListenTo) {
         this.config.columns.forEach(function(column) {
           newDataPoint.push((typeof data[column.value] !== "undefined") ? data[column.value].toString() : "");
         });
+        newDataPoint.path = path + childSnapshot.name();
         this.addDataPointToTable(newDataPoint);
       }.bind(this));
       break;
@@ -148,10 +152,35 @@ FireGrapher.prototype.listenForNewRecords = function(path, eventToListenTo) {
 
         this.addDataPointToGraph({
           "series": series,
+          "path": path + childSnapshot.name(),
           "xCoord": xCoord,
           "yCoord": parseInt(data[this.config.yCoord.value])
         });
 
+      }.bind(this));
+      break;
+  }
+};
+
+FireGrapher.prototype.listenForRemovedRecords = function(path) {
+  var pathParts = path.split("/");
+  var lastPathPart = pathParts[pathParts.length - 2];
+
+  switch (this.config.type) {
+    case "table":
+      console.log("TABLE");
+      break;
+    case "line":
+    case "scatter":
+      this.firebaseRef.child(path).on("child_removed", function(childSnapshot) {
+        var data = childSnapshot.val();
+        var series = (this.config.line[0] === "$") ? lastPathPart : data[this.config.line];
+        this.graphData[series].coordinates.forEach(function(dataPoint, index) {
+          if (dataPoint.path === (path + childSnapshot.name())) {
+            this.graphData[series].coordinates.splice(index, 1);
+          }
+        }.bind(this));
+        this.drawScales();
       }.bind(this));
       break;
   }
@@ -432,7 +461,7 @@ FireGrapher.prototype.draw = function() {
       this.tableRows = [];
       this.table = d3.select(this.cssSelector)
         .append("div")
-          .attr("class", "table");
+        .attr("class", "table");
       this.addHeaders(this.config.columns);
       break;
     case "line":
