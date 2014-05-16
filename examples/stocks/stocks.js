@@ -24,6 +24,7 @@
   function addYahooStocks() {
     for (var i = 0; i < 30; ++i) {
       addStockPrice("stocks", "YHOO", i, getRandomValue(5, 40), true);
+      addStockPrice("stocks2", "YHOO", i, getRandomValue(5, 40), false);
     }
   };
 

@@ -19,58 +19,96 @@ $carrot: #E67E22;
 $midnightBlue: #2C3E50;
 $seriesColors: $turquoise $red $purple $blue $sunflower $pumpkin $emerald $carrot $midnightBlue $pomegranate;
 
-/************************/
-/*  DEFAULT SVG STYLES  */
-/************************/
+/******************/
+/*  GRAPH STYLES  */
+/******************/
 svg {
   &.line, &.scatter {
     height: 340px;
     width: 510px;
     border: solid 1px red;
-  }
-}
 
-.series {
-  stroke: $black;
-  stroke-width: 2;
-  fill: none;
+    .series {
+      stroke: $black;
+      stroke-width: 2;
+      fill: none;
 
-  @for $seriesIndex from 1 through length($seriesColors) {
-    &.series#{$seriesIndex} {
-      stroke: nth($seriesColors, $seriesIndex);
+      @for $seriesIndex from 1 through length($seriesColors) {
+        &.series#{$seriesIndex} {
+          stroke: nth($seriesColors, $seriesIndex);
+        }
+      }
+    }
+
+    .dataPoint {
+      stroke: $black;
+      stroke-width: 2;
+
+      @for $seriesIndex from 1 through length($seriesColors) {
+        &.series#{$seriesIndex} {
+          stroke: nth($seriesColors, $seriesIndex);
+          fill: lighten(nth($seriesColors, $seriesIndex), 10%);
+        }
+      }
+    }
+
+    .axis {
+      stroke: $black;
+      stroke-width: 2;
+      fill: none;
+      shape-rendering: crispEdges;
+
+      &.x {
+
+      }
+
+      &.y {
+
+      }
     }
   }
 }
 
-.dataPoint {
-  stroke: $black;
-  stroke-width: 2;
+div.table {
+  display: inline-block;
 
-  @for $seriesIndex from 1 through length($seriesColors) {
-    &.series#{$seriesIndex} {
-      stroke: nth($seriesColors, $seriesIndex);
-      fill: lighten(nth($seriesColors, $seriesIndex), 10%);
+  .row {
+    display: block;
+    text-align: center;
+    border-left: solid 3px #000;
+    border-top: solid 3px #000;
+
+    * {
+      float: left;
+      width: 100px;
+      border-right: solid 3px black;
+      padding: 5px;
     }
+
+    .header {
+      font-weight: bold;
+      background: lighten($turquoise, 40%);
+    }
+
+    &:last-of-type {
+      border-bottom: solid 3px #000;
+    }
+
+    // TODO: make this "striped" table class only
+    &:nth-of-type(2n) {
+      background: lighten($gray, 30%);
+    }
+
+    &:nth-of-type(2n + 1) {
+      background: lighten($gray, 20%);
+    }
+
   }
 }
 
-.axis {
-  stroke: $black;
-  stroke-width: 2;
-  fill: none;
-  shape-rendering: crispEdges;
-
-  &.x {
-
-  }
-
-  &.y {
-
-  }
-}
-
-
-/* Table */
+/************/
+/* Clearfix */
+/************/
 .clearfix:before, .clearfix:after {
   content: " ";
   display: table;
@@ -82,26 +120,4 @@ svg {
 
 .clearfix {
   *zoom: 1;
-}
-
-.table > .row {
-  text-align: center;
-  border-left: solid 3px #000;
-  border-top: solid 3px #000;
-}
-
-.table > .row:last-of-type {
-  border-bottom: solid 3px #000;
-}
-
-.table > .row > * {
-  float: left;
-  width: 100px;
-  border-right: solid 3px black;
-  padding: 5px;
-}
-
-
-.table > .row > .header {
-  font-weight: bold;
 }
