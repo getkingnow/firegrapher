@@ -76,10 +76,6 @@
       "min": 40,
       "max": 150
     },
-    graph: {
-      "width": 500,
-      "height": 150
-    },
     series: "$symbol"
   });
 
@@ -96,6 +92,34 @@
       "value" : "price"
     },
     graph: {
+      "outerStrokeWidth": 5,
+      "innerStrokeWidth": 2,
+      "fillColor": "#35FC7A",
+      "fillOpacity": 0.1,
+      "outerStrokeColor": "#AB8B6B",
+      "innerStrokeColor": "#F4F2B7",
+      "axes": {
+        "x": {
+          "ticks": {
+            "fillColor": "#F54C99",
+            "fontSize": "8px"
+          },
+          "label": {
+            "fillColor": "#4C99F5",
+            "fontSize": "30px"
+          }
+        },
+        "y": {
+          "ticks": {
+            "fillColor": "#4CF599",
+            "fontSize": "20px"
+          },
+          "label": {
+            "fillColor": "#4CF1F5",
+            "fontSize": "10px"
+          }
+        }
+      },
       "markers": {
         "size": 8,
         "style": "flat"
@@ -182,7 +206,7 @@
   var fireGrapher3 = new FireGrapher();
   fireGrapher3.graph("#userTable", firebaseRef.child("users"), {
     type : "table",
-    path: "$userId6",
+    path: "$userId",
     columns: [
       { "label": "First Name", "value": "firstName", "width" : "50" },
       { "label": "Last Name", "value": "lastName", "width" : "50" },
@@ -213,7 +237,7 @@
       "height": 150,
       "markers": {
         "size": 8,
-        "strokeColors": ["red"],
+        "strokeColors": ["red"], // TODO: also allow this to be a dictionary of $currency: color?
         "strokeWidth": 5,
         "fillColors": ["blue"]
       },

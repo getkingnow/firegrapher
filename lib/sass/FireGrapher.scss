@@ -15,21 +15,8 @@ svg {
     border: solid 1px red;
 
     .axis {
-      stroke: $black;
-      stroke-width: 2;
-      fill: none;
       shape-rendering: crispEdges;
 
-      text {
-        font-size: 14px;
-        fill: $black;
-        stroke: none;
-      }
-    }
-
-    .axisLabel {
-      font-weight: bold;
-      font-size: 18px;
     }
   }
 }

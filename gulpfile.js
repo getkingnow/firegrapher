@@ -10,7 +10,6 @@ var uglify = require("gulp-uglify");
 var streamqueue = require("streamqueue");
 
 var express = require("express");
-var browserify = require('gulp-browserify');
 var livereload = require('connect-livereload');
 var refresh = require('gulp-livereload');
 var lrserver = require('tiny-lr')();
@@ -131,7 +130,7 @@ gulp.task("watch", function() {
   gulp.watch(["examples/**/*", paths.buildDir + "/**/*"], ["reload"]);
 });
 
-gulp.task("serve", ["server", "watch"]);
+gulp.task("serve", ["scripts", "styles", "server", "watch"]);
 
 /* Runs the "test" and "scripts" tasks by default */
 gulp.task("default", ["scripts", "test"]);
