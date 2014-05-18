@@ -21,6 +21,29 @@
     }
   };
 
+  function removeGoogleStocks() {
+    firebaseRef.child("stocks/GOOG").remove();
+    firebaseRef.child("stocks2").on("child_added", function(snapshot) {
+      var data = snapshot.val();
+      if (data.symbol === "GOOG") {
+        snapshot.ref().remove();
+      }
+    });
+  };
+
+  function removeStocks(numStocksToRemove) {
+    var ref = new Firebase("https://FireGrapherStocks.firebaseIO-demo.com/stocks2");
+    ref.limit(10).on("child_added", function(snapshot) {
+      if (numStocksToRemove > 0) {
+        numStocksToRemove -= 1;
+        snapshot.ref().remove();
+      }
+      else {
+        ref.off("child_added");
+      }
+    });
+  };
+
   function addYahooStocks() {
     for (var i = 0; i < 30; ++i) {
       addStockPrice("stocks", "YHOO", i, getRandomValue(5, 40), true);
@@ -58,6 +81,8 @@
 
   document.getElementById("resetFirebaseButton").addEventListener("click", resetFirebase);
   document.getElementById("addYahooStocksButton").addEventListener("click", addYahooStocks);
+  document.getElementById("removeGoogleStocksButton").addEventListener("click", removeGoogleStocks);
+  document.getElementById("removeStocksButton").addEventListener("click", function() { removeStocks(10) });
   document.getElementById("startJacobcoinButton").addEventListener("click", startJacobcoin);
 
   var fireGrapher1 = new FireGrapher();
