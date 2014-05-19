@@ -71,15 +71,19 @@
 
   function startJacobcoin() {
     window.setInterval(function() {
-      var price = getRandomValue(40, 70);
-      firebaseRef.child("jacobcoin").set({
-        "bid": price,
-        "ask": price
-      })
-    }, 500);
+      firebaseRef.child("currencies").set({
+        jacobcoin: {
+          ask: getRandomValue(40, 70)
+        },
+        /*tonycoin: {
+          ask: getRandomValue(50, 60)
+        }*/
+      });
+    }, 250);
   };
 
-  document.getElementById("resetFirebaseButton").addEventListener("click", resetFirebase);
+
+  //document.getElementById("resetFirebaseButton").addEventListener("click", resetFirebase);
   document.getElementById("addYahooStocksButton").addEventListener("click", addYahooStocks);
   document.getElementById("removeGoogleStocksButton").addEventListener("click", removeGoogleStocks);
   document.getElementById("removeStocksButton").addEventListener("click", function() { removeStocks(10) });
@@ -101,7 +105,27 @@
       "min": 40,
       "max": 150
     },
-    series: "$symbol"
+    series: "$symbol",
+    styles: {
+      axes: {
+        x: {
+          ticks: {
+            fillColor: "#FFF"
+          },
+          label: {
+            fillColor: "#FFF"
+          }
+        },
+        y: {
+          ticks: {
+            fillColor: "#FFF"
+          },
+          label: {
+            fillColor: "#FFF"
+          }
+        }
+      }
+    }
   });
 
   var fireGrapher2 = new FireGrapher();
@@ -243,9 +267,9 @@
 
 
   var fireGrapher4 = new FireGrapher();
-  fireGrapher4.graph("#jacobcoinChart", firebaseRef, {
+  fireGrapher4.graph("#jacobcoinChart", firebaseRef.child("currencies"), {
     type : "line",
-    path: "jacobcoin",
+    path: "$currency",
     xCoord: {
       "label" : "Time",
       "stream" : true,
@@ -256,23 +280,6 @@
       "value" : "ask",
       "min": 40,
       "max": 60
-    },
-    styles: {
-      "size": {
-        "width": 500,
-        "height": 150
-      },
-      "markers": {
-        "size": 8,
-        "strokeColors": ["red"], // TODO: also allow this to be a dictionary of $currency: color?
-        "strokeWidth": 5,
-        "fillColors": ["blue"]
-      },
-      "series": {
-        "strokeWidth": 4,
-        "strokeColors": ["yellow"],
-        "fillColors": ["green"]
-      }
     },
     series: "$currency"
   });
