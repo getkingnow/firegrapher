@@ -8,6 +8,32 @@
 
     <!-- For syntax highlighting -->
     <link rel="stylesheet" href="css/zenburn.css">
+
+     <style type="text/css">
+      html, body, #map {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      .stations, .stations svg {
+        position: absolute;
+      }
+
+      .stations svg {
+        width: 60px;
+        height: 20px;
+        padding-right: 100px;
+        font: 10px sans-serif;
+      }
+
+      .stations circle {
+        fill: brown;
+        stroke: black;
+        stroke-width: 1.5px;
+      }
+    </style>
   </head>
 
   <body>
@@ -59,7 +85,7 @@
             <p>FirebaseGrapher code</p>
             <pre>
               var fireGrapher = new FireGrapher();
-              fireGrapher.graph("#stockChart1", firebaseRef, {
+              fireGrapher.graph("#stockChart1", firebaseRef.child("stocks"), {
                 type : "line",
                 path: "*",
                 xCoord: {
@@ -105,19 +131,22 @@
             <h3>Streaming</h3>
             <p>FirebaseGrapher code</p>
             <pre>
-              type : "line",
-                path: "$currency",
-                xCoord: {
-                  label: "Time",
-                  stream: true,
-                  limit: 30
-                },
-                yCoord: {
-                  label: "Price",
-                  value: "price"
-                },
-                series: "$currency"
-              }
+              var fireGrapher = new FireGrapher();
+              fireGrapher.graph("#jacobcoin", firebaseRef.child("currencies"), {
+                type : "line",
+                  path: "$currency",
+                  xCoord: {
+                    label: "Time",
+                    stream: true,
+                    limit: 30
+                  },
+                  yCoord: {
+                    label: "Price",
+                    value: "price"
+                  },
+                  series: "$currency"
+                }
+              });
             </pre>
           </section>
 
@@ -166,7 +195,7 @@
             <p>FirebaseGrapher code</p>
             <pre>
               var fireGrapher = new FireGrapher();
-              fireGrapher.graph("#stockChart2", firebaseRef, {
+              fireGrapher.graph("#stockChart2", firebaseRef.child("stocks"), {
                 type : "scatter",
                 path: "$symbol/*",
                 xCoord: {
@@ -251,7 +280,7 @@
             <p>FirebaseGrapher code</p>
             <pre>
               var fireGrapher = new FireGrapher();
-              fireGrapher.graph("#userTable", firebaseRef, {
+              fireGrapher.graph("#userTable", firebaseRef.child("users"), {
                 type : "table",
                 path: "$userId",
                 columns: [
@@ -310,7 +339,7 @@
             <p>FirebaseGrapher code</p>
             <pre>
               var fireGrapher = new FireGrapher();
-              fireGrapher.graph("#barChart", firebaseRef, {
+              fireGrapher.graph("#barChart", firebaseRef.child("stocks"), {
                 type : "bar",
                 path: "$symbol/*",
                 xCoord: {
@@ -338,28 +367,14 @@
             <h3>Map</h3>
             <p>Firebase data</p>
             <pre>
-              "stocks": {
-                "MSFT": {
-                  "-JBADA2adhAADS": {
-                    "price": 45,
-                    "time": 0
-                  },
-                  ...
+              "map": {
+                "-JBADA2adhAADS": {
+                  key: "Location 1",
+                  latitude: 45,
+                  longitude: -122,
+                  radius: 5
                 },
-                "AAPL": {
-                  "-JBADA2adhAADS": {
-                    "price": 70,
-                    "time": 0
-                  },
-                  ...
-                },
-                "GOOG": {
-                  "-JBADA2adhAADS": {
-                    "price": 58,
-                    "time": 0
-                  },
-                  ...
-                }
+                ...
               }
             </pre>
           </section>
@@ -369,17 +384,15 @@
             <p>FirebaseGrapher code</p>
             <pre>
               var fireGrapher = new FireGrapher();
-              fireGrapher.graph("#barChart", firebaseRef, {
-                type : "bar",
-                path: "$symbol/*",
-                xCoord: {
-                  "label" : "Symbols"
-                },
-                yCoord: {
-                  "label" : "Price"
-                },
-                value : "price",
-                series: "$symbol"
+              fireGrapher.graph("#map", firebaseRef.child("map"), {
+                type : "map",
+                path : "*",
+                marker : {
+                  label : "key",
+                  latitude : "latitude",
+                  longitude : "longitude",
+                  magnitude : "radius"
+                }
               });
             </pre>
           </section>
@@ -387,7 +400,7 @@
           <section>
             <h3>Map</h3>
             <p>Output</p>
-            <div id="stockChart6"></div>
+            <div id="map"></div>
           </section>
         </section>
 
@@ -412,6 +425,8 @@
     <!-- d3.js -->
     <script src="http://cdnjs.cloudflare.com/ajax/libs/d3/2.10.0/d3.v2.min.js"></script>
 
+    <!-- Google Maps -->
+    <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true"></script>
 
     <script src="js/graphs.js"></script>
 

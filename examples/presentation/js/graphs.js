@@ -328,4 +328,16 @@
     value : "price",
     series: "$symbol"
   });
+
+  var fireGrapher7 = new FireGrapher();
+  fireGrapher7.graph("#map", firebaseRef.child("map"), {
+    type : "map",
+    path : "*",
+    marker : {
+      label : "key",
+      latitude : "latitude",
+      longitude : "longitude",
+      magnitude : "radius"
+    }
+  });
 })();
