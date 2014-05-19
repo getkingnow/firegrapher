@@ -78,7 +78,54 @@
           <section>
             <h3>Line Graph</h3>
             <p>Output</p>
+            <input id="addYahooStocksButton" type="button" value="Add YHOO" />
+            <input id="removeGoogleStocksButton" type="button" value="Remove GOOG" />
             <div id="stockChart1"></div>
+          </section>
+        </section>
+
+        <!-- Streaming -->
+        <section>
+          <section>
+            <h3>Streaming</h3>
+            <p>Firebase data</p>
+            <pre>
+              "currencies": {
+                "jacobcoin": {
+                  "price": 45,
+                },
+                "tonycoin": {
+                  "price": 50,
+                }
+              }
+            </pre>
+          </section>
+
+          <section>
+            <h3>Streaming</h3>
+            <p>FirebaseGrapher code</p>
+            <pre>
+              type : "line",
+                path: "$currency",
+                xCoord: {
+                  label: "Time",
+                  stream: true,
+                  limit: 30
+                },
+                yCoord: {
+                  label: "Price",
+                  value: "price"
+                },
+                series: "$currency"
+              }
+            </pre>
+          </section>
+
+          <section>
+            <h3>Streaming</h3>
+            <p>Output</p>
+            <input id="startJacobcoinButton" type="button" value="Start" />
+            <div id="jacobcoinChart"></div>
           </section>
         </section>
 
@@ -168,6 +215,7 @@
           <section>
             <h3>Scatter Plot</h3>
             <p>Output</p>
+            <input id="removeStocksButton" type="button" value="Remove last 10 stocks" />
             <div id="stockChart2"></div>
           </section>
         </section>
@@ -345,7 +393,7 @@
 
         <!-- The end -->
         <section>
-          <h1>YAY!</h1>
+          <h1>WOOT!</h1>
         </section>
       </div>
     </div>
