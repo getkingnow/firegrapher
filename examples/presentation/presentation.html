@@ -85,7 +85,7 @@
             <p>FirebaseGrapher code</p>
             <pre>
               var fireGrapher = new FireGrapher();
-              fireGrapher.graph("#stockChart1", firebaseRef.child("stocks"), {
+              fireGrapher.graph("#stocks", firebaseRef.child("stocks"), {
                 type : "line",
                 path: "*",
                 xCoord: {
@@ -132,7 +132,7 @@
             <p>FirebaseGrapher code</p>
             <pre>
               var fireGrapher = new FireGrapher();
-              fireGrapher.graph("#jacobcoin", firebaseRef.child("currencies"), {
+              fireGrapher.graph("#coin", firebaseRef.child("currencies"), {
                 type : "line",
                   path: "$currency",
                   xCoord: {
@@ -195,7 +195,7 @@
             <p>FirebaseGrapher code</p>
             <pre>
               var fireGrapher = new FireGrapher();
-              fireGrapher.graph("#stockChart2", firebaseRef.child("stocks"), {
+              fireGrapher.graph("#stocks", firebaseRef.child("stocks"), {
                 type : "scatter",
                 path: "$symbol/*",
                 xCoord: {
