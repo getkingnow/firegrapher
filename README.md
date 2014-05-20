@@ -6,11 +6,12 @@ Graphing/charting library for Firebase
 TODO
 -----
 Remaining FireGrapher work
-* legends [Tony]
+* [Done] legends [Tony]
+** CSS works remains
 * additional configurations [Jacob]
 * documentation [Jacob]
 * clean up in general [both]
-* graph titles [Tony]
+* [Done] graph titles [Tony]
 * clean up CSS class names [Jacob]
 
 
