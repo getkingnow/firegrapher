@@ -89,6 +89,7 @@
   fireGrapher1.graph("#stockChart1", firebaseRef.child("stocks"), {
     type : "line",
     path: "$symbol/*",
+    title: "Price over Time (Stocks in USD)",
     xCoord: {
       "label" : "Time",
       "value" : "time",
