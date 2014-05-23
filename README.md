@@ -58,6 +58,13 @@ Creates a graph of the data stored at `firebaseRef` and places it in the element
 
 ## Graph Types
 
+The `config` you pass into `FireGrapher.graph()` is where all the magic happens. Every graph type requires at least the following to be specified in the `config` object:
+
+* `type`: the type of the graph (one of "line", "scatter", "bar", "table", or "map").
+* `path`: the subpath from the `firebaseRef` you passed into `FireGrapher.graph()` to an individual data point or record. You can specify wildcard paths using `$. Here is an example: TODO
+
+The following lists the specific `config` options for each graph type.
+
 ### Line Graph
 
   {
