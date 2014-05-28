@@ -3,13 +3,13 @@
 TODO
 -----
 Remaining FireGrapher work
-* [Done] legends [Tony]
 ** CSS works remains
 * additional configurations [Jacob]
 * documentation [Jacob]
 * clean up in general [both]
-* [Done] graph titles [Tony]
 * clean up CSS class names [Jacob]
+* add additional examples [Tony]
+* add datatype for xCoord and yCoord values (e.g. Number, Date, etc) [Both]
 
 FireGrapher is a graphing/charting library for your Firebase data. It's goal is to provide an expressive, easily-customizable, and realtime graphing tool which requires no knowledge of existing graphing tools and only take a few lines of JavaScript to produce. FireGrapher is designed to work with Firebase and works no matter how you organize your data. Because FireGrapher is backed by Firebase, your graphs update in realtime with no extra work.
 
