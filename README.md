@@ -177,6 +177,44 @@ By default, FireGrapher assigns styles to your graphs, giving them all a consist
 
 View the `TODO` directory for some sample CSS and SCSS files with custom styles. If you come up with a style set you would like to share, submit a PR and we can add it for others to use!
 
+Classes:
+
+- Line graph:
+  - .fg-line
+  - .fg-title
+  - .fg-legend
+    - .fg-legend-container
+    - .fg-legend-text
+  - .fg-axis
+    - .fg-x-axis
+      - path.domain - outer margin
+      - g - individual tick line
+        - .tick - tick line
+        - text - tick label
+    - .fg-y-axis
+      - path.domain - outer margin
+      - g - individual tick line
+        - .tick - tick line
+        - text - tick label
+  - .fg-axis-label
+    - .fg-x-axis-label
+    - .fg-y-axis-label
+  - .fg-series
+    - .fg-series-#
+  - .fg-marker
+    - .fg-series-#
+
+- Scatter plot
+
+- Bar graph
+  - fg-bar
+  - fg-series
+    - fg-series-#
+
+
+- Table
+
+
 "styles": {
       graph: {
         "fillColor": "#DDDDDD",

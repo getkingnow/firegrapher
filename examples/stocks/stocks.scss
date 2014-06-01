@@ -1,0 +1,98 @@
+#graphs > * {
+  display: inline;
+}
+
+#stockChart1 {
+
+}
+
+#stockChart2 {
+  .domain {
+    /*
+    "outerStrokeColor": "#AB8B6B"
+    "outerStrokeWidth": 5
+    "fillColor": "#35FC7A"
+    "fillOpacity": 0.1
+    */
+    stroke: #FF00FF;
+    stroke-width: 5px;
+    fill: #35FC7A;
+    fill-opacity: 0.1;
+  }
+
+  .tick {
+    /*
+    "innerStrokeColor": "#F4F2B7"
+    "innerStrokeWidth": 2
+    */
+    stroke: #F4F2B7;
+    stroke-width: 2px;
+  }
+
+  .fg-axis {
+    &.fg-x-axis {
+      .tick {
+        /*
+        "fillColor": "#F54C99",
+        "fontSize": "8px"
+        */
+        fill: #F54C99;
+        font-size: 8px;
+      }
+
+      text {
+        /*
+        "fillColor": "#4C99F5",
+        "fontSize": "30px"
+        */
+        fill: #4C99F5;
+        font-size: 30px;
+      }
+    }
+
+    &.fg-y-axis {
+      .tick {
+        /*
+        "fillColor": "#4C99F5",
+        "fontSize": "30px"
+        */
+        fill: #4C99F5;
+        font-size: 30px;
+      }
+
+      text {
+        /*
+        "fillColor": "#4CF1F5",
+        "fontSize": "10px"
+        */
+        fill: #4CF1F5;
+        font-size: 10px;
+      }
+    }
+  }
+
+  .fg-marker {
+    /*
+    TODO
+    "size": 8,
+    "style": "flat"
+    */
+
+  }
+}
+
+#userTable {
+
+}
+
+#jacobcoinChart {
+
+}
+
+#digitalCurrencyChart {
+
+}
+
+#stockChart6 {
+
+}

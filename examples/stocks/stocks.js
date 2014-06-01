@@ -118,34 +118,6 @@
       "value" : "price"
     },
     styles: {
-      "outerStrokeWidth": 5,
-      "innerStrokeWidth": 2,
-      "fillColor": "#35FC7A",
-      "fillOpacity": 0.1,
-      "outerStrokeColor": "#AB8B6B",
-      "innerStrokeColor": "#F4F2B7",
-      "axes": {
-        "x": {
-          "ticks": {
-            "fillColor": "#F54C99",
-            "fontSize": "8px"
-          },
-          "label": {
-            "fillColor": "#4C99F5",
-            "fontSize": "30px"
-          }
-        },
-        "y": {
-          "ticks": {
-            "fillColor": "#4CF599",
-            "fontSize": "20px"
-          },
-          "label": {
-            "fillColor": "#4CF1F5",
-            "fontSize": "10px"
-          }
-        }
-      },
       "markers": {
         "size": 8,
         "style": "flat"

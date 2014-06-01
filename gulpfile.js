@@ -7,6 +7,7 @@ var karma = require("gulp-karma");
 var concat = require("gulp-concat");
 var jshint = require("gulp-jshint");
 var uglify = require("gulp-uglify");
+var rename = require("gulp-rename");
 var streamqueue = require("streamqueue");
 
 var express = require("express");
@@ -87,7 +88,7 @@ gulp.task("scripts", function() {
     .pipe(gulp.dest(paths.scripts.buildDir));
 });
 
-/* Converts sass files to css */
+/* Converts scss files to css */
 gulp.task("styles", function () {
   return gulp.src(paths.styles.lib)
     .pipe(sass({
@@ -95,6 +96,19 @@ gulp.task("styles", function () {
       "errLogToConsole": true
     }))
     .pipe(gulp.dest(paths.styles.buildDir));
+});
+
+/* Converts scss files in the /examples/ directory to css */
+gulp.task("styles-examples", function () {
+  return gulp.src("examples/**/*.scss")
+    .pipe(sass({
+      "outputStyle" : "compressed",
+      "errLogToConsole": true
+    }))
+    .pipe(rename(function(path) {
+        path.extname = ".css"
+    }))
+    .pipe(gulp.dest("./examples"));
 });
 
 /* Uses the Karma test runner to run the Jasmine tests */
@@ -127,7 +141,7 @@ gulp.task('server', function() {
 gulp.task("watch", function() {
   gulp.watch(paths.scripts.lib, ["scripts"]);
   gulp.watch(paths.styles.lib, ["styles"]);
-  gulp.watch(["examples/**/*", paths.buildDir + "/**/*"], ["reload"]);
+  gulp.watch(["examples/**/*", paths.buildDir + "/**/*"], ["styles-examples", "reload"]);
 });
 
 gulp.task("serve", ["scripts", "styles", "server", "watch"]);
