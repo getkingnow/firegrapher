@@ -2,6 +2,8 @@
 /*  REQUIRES  */
 /**************/
 var gulp = require("gulp");
+
+// File IO
 var sass = require("gulp-sass");
 var karma = require("gulp-karma");
 var concat = require("gulp-concat");
@@ -10,50 +12,59 @@ var uglify = require("gulp-uglify");
 var rename = require("gulp-rename");
 var streamqueue = require("streamqueue");
 
+// Testing
+var karma = require("gulp-karma");
+
+// Live reload
 var express = require("express");
-var livereload = require('connect-livereload');
-var refresh = require('gulp-livereload');
-var lrserver = require('tiny-lr')();
-var notify = require('gulp-notify');
-var livereloadport = 35729;
-var serverport = 3000;
+var lrserver = require("tiny-lr")();
+var refresh = require("gulp-livereload");
+var livereload = require("connect-livereload");
 
 /****************/
 /*  FILE PATHS  */
 /****************/
 var paths = {
-  "buildDir": "build",
-  "scripts": {
-    "lib": [
-      "lib/FireGrapherParser.js",
-      "lib/FireGrapherD3.js"
-    ],
-    "unminified": "FireGrapher.js",
-    "minified": "FireGrapher.min.js",
-    "buildDir": "build/js"
+  destDir: "dist",
+
+  scripts: {
+    src: {
+      dir: "src/",
+      files: [
+        "*.js"
+      ]
+    },
+    dest: {
+      dir: "dist/js/",
+      files: {
+        unminified: "firegrapher.js",
+        minified: "firegrapher.min.js"
+      }
+    }
   },
 
-  "styles": {
-    "lib": [
-      "lib/sass/*.scss"
-    ],
-    "buildDir": "build/css"
+  styles: {
+    src: {
+      dir: "src/sass/",
+      files: [
+        "*.scss"
+      ]
+    },
+    dest: {
+      dir: "dist/css/"
+    }
   },
 
-  "tests": [
-    "bower_components/firebase/firebase.js",
-    "lib/*.js",
-    "tests/FireGrapher.spec.js"
-  ]
+  tests: {
+    config: "tests/karma.conf.js",
+    files: [
+      "bower_components/firebase/firebase.js",
+      "src/*.js",
+      "tests/specs/*.spec.js"
+    ]
+  }
 };
 
-
-//Configure server, but only start it when running the serve task
-var server = express();
-//Add livereload middleware before static-middleware
-server.use(livereload({
-  port: livereloadport
-}));
 
 /***********/
 /*  TASKS  */
@@ -62,43 +73,43 @@ server.use(livereload({
 gulp.task("scripts", function() {
   // Concatenate all src files together
   var stream = streamqueue({ objectMode: true });
-  stream.queue(gulp.src("lib/header.js"));
-  stream.queue(gulp.src(paths.scripts.lib));
-  stream.queue(gulp.src("lib/footer.js"));
+  stream.queue(gulp.src("build/header"));
+  stream.queue(gulp.src(paths.scripts.src.dir + paths.scripts.src.files));
+  stream.queue(gulp.src("build/footer"));
 
   // Output the final concatenated script file
   return stream.done()
     // Rename file
-    .pipe(concat(paths.scripts.unminified))
+    .pipe(concat(paths.scripts.dest.files.unminified))
 
     // Lint
     .pipe(jshint())
     .pipe(jshint.reporter("jshint-stylish"))
 
     // Write un-minified version
-    .pipe(gulp.dest(paths.scripts.buildDir))
+    .pipe(gulp.dest(paths.scripts.dest.dir))
 
     // Minify
     .pipe(uglify())
 
     // Rename file
-    .pipe(concat(paths.scripts.minified))
+    .pipe(concat(paths.scripts.dest.files.minified))
 
-    // Write minified version
-    .pipe(gulp.dest(paths.scripts.buildDir));
+    // Write minified version to the distribution directory
+    .pipe(gulp.dest(paths.scripts.dest.dir));
 });
 
 /* Converts scss files to css */
 gulp.task("styles", function () {
-  return gulp.src(paths.styles.lib)
+  return gulp.src(paths.styles.src.dir + paths.styles.src.files)
     .pipe(sass({
       "outputStyle" : "compressed",
       "errLogToConsole": true
     }))
-    .pipe(gulp.dest(paths.styles.buildDir));
+    .pipe(gulp.dest(paths.styles.dest.dir));
 });
 
-/* Converts scss files in the /examples/ directory to css */
+/* Converts scss files to css in the /examples/ directory */
 gulp.task("styles-examples", function () {
   return gulp.src("examples/**/*.scss")
     .pipe(sass({
@@ -113,9 +124,9 @@ gulp.task("styles-examples", function () {
 
 /* Uses the Karma test runner to run the Jasmine tests */
 gulp.task("test", function() {
-  return gulp.src(paths.tests)
+  return gulp.src(paths.tests.files)
     .pipe(karma({
-      configFile: "karma.conf.js",
+      configFile: paths.tests.config,
       action: "run"
     }))
     .on("error", function(err) {
@@ -123,28 +134,40 @@ gulp.task("test", function() {
     });
 });
 
-/* Sets up Browserify */
-gulp.task('reload', function(){
-  gulp.src(paths.buildDir + "/**/*")
+/* Runs tasks when certain files change */
+gulp.task("watch", function() {
+  gulp.watch(["build/*", paths.scripts.src.dir + paths.scripts.src.files], ["scripts", "reload"]);
+  gulp.watch(paths.styles.src.dir + paths.styles.src.files, ["styles"]);
+  gulp.watch(["examples/**/*"], ["styles-examples", "reload"]);
+});
+
+/* Sets up the LiveReload server */
+gulp.task("server", function() {
+  var server = express();
+  var livereloadPort = 35727;
+  var serverPort = 3000;
+
+  // Add livereload middleware before static-middleware
+  server.use(livereload({
+    port: livereloadPort
+  }));
+
+  // Set up tje static fileserver, which serves files in the source directory
+  server.use(express.static(__dirname));
+
+  // Set up the livereload server
+  server.listen(serverPort);
+  lrserver.listen(livereloadPort);
+});
+
+/* Reloads the LiveReload server */
+gulp.task("reload", function(){
+  gulp.src(paths.destDir + "/**/*")
    .pipe(refresh(lrserver));
 });
 
-gulp.task('server', function() {
-  //Set up your static fileserver, which serves files in the build dir
-  server.use(express.static(__dirname));
-  server.listen(serverport);
-  //Set up your livereload server
-  lrserver.listen(livereloadport);
-});
-
-/* Re-runs the "scripts" task every time a script file changes */
-gulp.task("watch", function() {
-  gulp.watch(paths.scripts.lib, ["scripts"]);
-  gulp.watch(paths.styles.lib, ["styles"]);
-  gulp.watch(["examples/**/*", paths.buildDir + "/**/*"], ["styles-examples", "reload"]);
-});
-
+/* Initiates the LiveReload server */
 gulp.task("serve", ["scripts", "styles", "server", "watch"]);
 
-/* Runs the "test" and "scripts" tasks by default */
-gulp.task("default", ["scripts", "test"]);
+/* Builds and tests the files by default */
+gulp.task("default", ["scripts", "styles", "test"]);

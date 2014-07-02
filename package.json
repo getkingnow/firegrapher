@@ -1,46 +1,46 @@
 {
   "name": "firegrapher",
-  "description": "TODO",
-  "main": "build/FireGrapher.js",
+  "description": "Graphing library for Firebase",
+  "version": "1.0.0",
+  "main": "./dist/firegrapher.min.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/firebase/TODO.git"
+    "url": "https://github.com/firebase/firegrapher.git"
   },
   "bugs": {
-    "url": "https://github.com/firebase/TODO/issues"
+    "url": "https://github.com/firebase/firegrapher/issues"
   },
-  "private": true,
   "licenses": [
     {
       "type": "MIT",
       "url": "http://firebase.mit-license.org/"
     }
   ],
-  "version": "0.0.0",
   "dependencies": {
-    "firebase": "~1.0.11"
+    "d3": "^3.4.9",
+    "firebase": "1.0.x"
   },
   "devDependencies": {
     "karma": "^0.12.9",
     "karma-jasmine": "~0.2.0",
-    "karma-script-launcher": "~0.1.0",
-    "karma-firefox-launcher": "~0.1.0",
-    "karma-phantomjs-launcher": "~0.1.0",
-    "karma-chrome-launcher": "~0.1.0",
-    "gulp": "^3.5.6",
+    "karma-coverage": "^0.2.4",
+    "karma-phantomjs-launcher": "~0.1.4",
+    "gulp": "^3.8.5",
+    "tiny-lr": "0.0.7",
+    "express": "^4.2.0",
+    "gulp-sass": "^0.7.1",
+    "gulp-karma": "0.0.4",
+    "streamqueue": "0.0.5",
     "gulp-concat": "^2.2.0",
     "gulp-uglify": "^0.2.1",
     "gulp-jshint": "^1.5.1",
-    "gulp-sass": "^0.7.1",
-    "gulp-ext-replace": "0.0.5",
+    "gulp-rename": "^1.2.0",
     "jshint-stylish": "^0.2.0",
-    "gulp-karma": "0.0.4",
-    "streamqueue": "0.0.5",
-    "connect-livereload": "^0.4.0",
-    "tiny-lr": "0.0.7",
     "gulp-livereload": "^1.5.0",
-    "gulp-notify": "^1.2.5",
-    "express": "^4.2.0",
-    "gulp-rename": "^1.2.0"
+    "gulp-ext-replace": "0.0.5",
+    "connect-livereload": "^0.4.0"
+  },
+  "scripts": {
+    "test": "gulp test"
   }
 }
