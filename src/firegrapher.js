@@ -87,10 +87,10 @@ var FireGrapher = function() {
         "outerStrokeWidth": 2,
         "innerStrokeColor": "#000000",
         "innerStrokeWidth": 1,
-        "size": {
+        /*"size": {
           "width": 500,
           "height": 300
-        },
+        },*/
         "axes": {
           "x": {
             "ticks": {
@@ -180,6 +180,11 @@ var FireGrapher = function() {
     // Recursively loop through the global config object and set any unspecified options
     // to their default values
     _recursivelySetDefaults(config, _getDefaultConfig());
+    var el = document.querySelector(cssSelector);
+    config.styles.size = {
+      width: el.clientWidth,
+      height: el.clientHeight
+    };
 
     var d3Grapher = new FireGrapherD3(cssSelector, config);
 

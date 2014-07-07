@@ -101,10 +101,10 @@ var FireGrapher = function() {
         "outerStrokeWidth": 2,
         "innerStrokeColor": "#000000",
         "innerStrokeWidth": 1,
-        "size": {
+        /*"size": {
           "width": 500,
           "height": 300
-        },
+        },*/
         "axes": {
           "x": {
             "ticks": {
@@ -194,6 +194,11 @@ var FireGrapher = function() {
     // Recursively loop through the global config object and set any unspecified options
     // to their default values
     _recursivelySetDefaults(config, _getDefaultConfig());
+    var el = document.querySelector(cssSelector);
+    config.styles.size = {
+      width: el.clientWidth,
+      height: el.clientHeight
+    };
 
     var d3Grapher = new FireGrapherD3(cssSelector, config);
 
@@ -303,11 +308,12 @@ var FireGrapherD3 = function(cssSelector, config) {
     var sortAsc = true;
     _table
       .append("div")
-        .attr("class", "row head clearfix")
+        .attr("class", "fg-table-row")
         .selectAll("div.header")
           .data(columns).enter()
           .append("div")
-            .attr("class", "header")
+            .attr("class", "fg-table-header")
+            .attr("style", "font-weight: bold;")
             .attr("width", function(column) {
               return column.width;
             })
@@ -336,6 +342,9 @@ var FireGrapherD3 = function(cssSelector, config) {
                   }
                 });
             });
+
+    // TODO: add striping
+    // TODO: fix column sorting which Jacob broke
   }
 
   // Graphing Methods
@@ -485,7 +494,7 @@ var FireGrapherD3 = function(cssSelector, config) {
         .attr("height", function(d) { return _yScale.range()[0] - _yScale(d.aggregation); });
   }
 
-    function _drawGraph() {
+  function _drawGraph() {
     var margin = { top: 20, bottom: 30, left: 60, right: 20 };
     var height = _config.styles.size.height - margin.bottom - margin.top;
     var width = _config.styles.size.width - margin.left - margin.right;
@@ -540,6 +549,7 @@ var FireGrapherD3 = function(cssSelector, config) {
       .append("g")
         .attr("class", "fg-axis fg-x-axis")
         .attr("transform", "translate(0," + (height) + ")")
+        .attr("shape-rendering", "crispEdges")
         .call(xAxis)
         .selectAll("text")
           .attr("x", 0)
@@ -548,6 +558,7 @@ var FireGrapherD3 = function(cssSelector, config) {
     _graph
       .append("g")
         .attr("class", "fg-axis fg-y-axis")
+        .attr("shape-rendering", "crispEdges")
         .call(yAxis)
         .selectAll("text")
           .attr("x", -10)
@@ -762,15 +773,18 @@ var FireGrapherD3 = function(cssSelector, config) {
   function _addDataPointToTable(newDataPoint) {
     _tableRows.push(newDataPoint);
     _table
-      .selectAll("div.row")
+      .selectAll("div.fg-table-row")
         .data(_tableRows).enter()
         .append("div")
-          .attr("class", "row data clearfix")
+          .attr("class", "fg-table-row")
+          .attr("style", "display: block; text-align: center; border-left: solid 3px #000; border-top: solid 3px #000;")
           .selectAll("div.cell").data(function(d) {
             return d;
           }).enter()
           .append("div")
-            .attr("class", "cell").attr("width", function(d, i) {
+            .attr("class", "gf-table-cell")
+            .attr("style", "float: left; width: 100px; border-right: solid 3px black; padding: 5px;")
+            .attr("width", function(d, i) {
               return _config.columns[i].width;
             })
             .text(function(d) {
@@ -793,7 +807,8 @@ var FireGrapherD3 = function(cssSelector, config) {
         _tableRows = [];
         _table = d3.select(_cssSelector)
           .append("div")
-            .attr("class", "table");
+            .attr("class", "fg-table")
+            .attr("style", "display: inline-block;");
         _addTableHeaders(_config.columns);
         break;
       case "bar":
@@ -902,7 +917,7 @@ var FireGrapherParser = function(firebaseRef, config, d3Grapher) {
           };
           break;
         case "table":
-          var newDataPoint = [];
+          newDataPoint = [];
           _config.columns.forEach(function(column) {
             newDataPoint.push((typeof data[column.value] !== "undefined") ? data[column.value].toString() : "");
           });

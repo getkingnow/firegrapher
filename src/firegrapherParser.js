@@ -29,7 +29,7 @@ var FireGrapherParser = function(firebaseRef, config, d3Grapher) {
           };
           break;
         case "table":
-          var newDataPoint = [];
+          newDataPoint = [];
           _config.columns.forEach(function(column) {
             newDataPoint.push((typeof data[column.value] !== "undefined") ? data[column.value].toString() : "");
           });

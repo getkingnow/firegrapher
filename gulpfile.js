@@ -43,18 +43,6 @@ var paths = {
     }
   },
 
-  styles: {
-    src: {
-      dir: "src/sass/",
-      files: [
-        "*.scss"
-      ]
-    },
-    dest: {
-      dir: "dist/css/"
-    }
-  },
-
   tests: {
     config: "tests/karma.conf.js",
     files: [
@@ -99,16 +87,6 @@ gulp.task("scripts", function() {
     .pipe(gulp.dest(paths.scripts.dest.dir));
 });
 
-/* Converts scss files to css */
-gulp.task("styles", function () {
-  return gulp.src(paths.styles.src.dir + paths.styles.src.files)
-    .pipe(sass({
-      "outputStyle" : "compressed",
-      "errLogToConsole": true
-    }))
-    .pipe(gulp.dest(paths.styles.dest.dir));
-});
-
 /* Converts scss files to css in the /examples/ directory */
 gulp.task("styles-examples", function () {
   return gulp.src("examples/**/*.scss")
@@ -137,7 +115,6 @@ gulp.task("test", function() {
 /* Runs tasks when certain files change */
 gulp.task("watch", function() {
   gulp.watch(["build/*", paths.scripts.src.dir + paths.scripts.src.files], ["scripts", "reload"]);
-  gulp.watch(paths.styles.src.dir + paths.styles.src.files, ["styles"]);
   gulp.watch(["examples/**/*"], ["styles-examples", "reload"]);
 });
 
@@ -167,7 +144,7 @@ gulp.task("reload", function(){
 });
 
 /* Initiates the LiveReload server */
-gulp.task("serve", ["scripts", "styles", "server", "watch"]);
+gulp.task("serve", ["scripts", "server", "watch"]);
 
 /* Builds and tests the files by default */
 gulp.task("default", ["scripts", "styles", "test"]);
