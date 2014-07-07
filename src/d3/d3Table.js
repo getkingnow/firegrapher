@@ -24,7 +24,8 @@ var D3Table = function(config, cssSelector) {
     this.data = [];
     _table = d3.select(_cssSelector)
       .append("div")
-        .attr("class", "table");
+        .attr("class", "fg-table")
+        .attr("style", "display: inline-block;");
     _addTableHeaders(_config.columns);
   };
   
@@ -35,15 +36,18 @@ var D3Table = function(config, cssSelector) {
   this.addDataPoint = function(newDataPoint) {
     _this.data.push(newDataPoint);
     _table
-      .selectAll("div.row")
+      .selectAll("div.fg-table-row")
         .data(_this.data).enter()
         .append("div")
-          .attr("class", "row data clearfix")
+          .attr("class", "fg-table-row")
+          .attr("style", "display: block; text-align: center; border-left: solid 3px #000; border-top: solid 3px #000;")
           .selectAll("div.cell").data(function(d) {
             return d;
           }).enter()
           .append("div")
-            .attr("class", "cell").attr("width", function(d, i) {
+            .attr("class", "gf-table-cell")
+            .attr("style", "float: left; width: 100px; border-right: solid 3px black; padding: 5px;")
+            .attr("width", function(d, i) {
               return _config.columns[i].width;
             })
             .text(function(d) {
@@ -60,11 +64,12 @@ var D3Table = function(config, cssSelector) {
     var sortAsc = true;
     _table
       .append("div")
-        .attr("class", "row head clearfix")
+        .attr("class", "fg-table-row")
         .selectAll("div.header")
           .data(columns).enter()
           .append("div")
-            .attr("class", "header")
+            .attr("class", "fg-table-header")
+            .attr("style", "font-weight: bold;")
             .attr("width", function(column) {
               return column.width;
             })

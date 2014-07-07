@@ -98,6 +98,7 @@ var D3Graph = function(config, cssSelector) {
       .append("g")
         .attr("class", "fg-axis fg-x-axis")
         .attr("transform", "translate(0," + (height) + ")")
+        .attr("shape-rendering", "crispEdges")
         .call(xAxis)
         .selectAll("text")
           .attr("x", 0)
@@ -106,6 +107,7 @@ var D3Graph = function(config, cssSelector) {
     _graph
       .append("g")
         .attr("class", "fg-axis fg-y-axis")
+        .attr("shape-rendering", "crispEdges")
         .call(yAxis)
         .selectAll("text")
           .attr("x", -10)
@@ -264,7 +266,7 @@ var D3Graph = function(config, cssSelector) {
       [0, _this.data[newDataPoint.series].aggregation]);
     if (redrawGraph) {
       // if the scales have changed, we will redraw everything with the new data points
-      _drawGraph();
+      _this.draw();
     } else {
       // if scales haven't changed, go ahead and add the new data point
       _drawBar(newDataPoint.series, _this.data[newDataPoint.series]);
@@ -307,7 +309,7 @@ var D3Graph = function(config, cssSelector) {
 
     // if the scales have changed, we will redraw everything with the new data points
     if (redrawGraph) {
-      _drawGraph();
+      _this.draw();
     } else {
       var seriesIndex = _this.data[newDataPoint.series].seriesIndex;
       _drawLegend();
@@ -468,149 +470,5 @@ var D3Graph = function(config, cssSelector) {
         .attr("width", _xScale.rangeBand())
         .attr("y", function(d) { return _yScale(d.aggregation); })
         .attr("height", function(d) { return _yScale.range()[0] - _yScale(d.aggregation); });
-  }
-
-  function _drawGraph() {
-    var margin = { top: 20, bottom: 30, left: 60, right: 20 };
-    var height = _config.styles.size.height - margin.bottom - margin.top;
-    var width = _config.styles.size.width - margin.left - margin.right;
-
-    // if we need to redraw the scales,
-    // that means everything on it, is not to scale
-    // so we need to redraw the entire graph
-    d3.select(_cssSelector + " svg").remove();
-    _graph = d3.select(_cssSelector)
-      .append("svg")
-        .attr("class", "fg-" + _config.type)
-        .attr("width", _config.styles.size.width + margin.left + margin.right)
-        .attr("height", _config.styles.size.height + margin.bottom + margin.top)
-        .append("g")
-          .attr("transform", "translate("+margin.left+", "+margin.bottom+")");
-
-    // append graph title
-    if (_config.title) {
-      _graph.append("text")
-        .attr("class", "fg-title")
-        .attr("x", (width / 2))
-        .attr("y", 0 - (margin.top / 2))
-        .attr("text-anchor", "middle")
-        .style("font-size", "16px")
-        .style("text-decoration", "underline")
-        .text(_config.title);
-    }
-
-    // set the range based on the calculated width and height
-    _yScale.range([height, 0]);
-    if (_config.type === "bar") {
-      _xScale.rangeRoundBands([0, width], 0.1, 1);
-    } else {
-      _xScale.range([0, width]);
-    }
-
-    // set the new axes
-    var xAxis = d3.svg.axis()
-      .orient("bottom")
-      .scale(_xScale)
-      .ticks(Math.floor(width * 0.035))
-      .tickSize(-height, -height);
-
-    var yAxis = d3.svg.axis()
-      .orient("left")
-      .scale(_yScale)
-      .ticks(Math.floor(height * 0.035))
-      .tickSize(-width, -width);
-
-    // adding new scales
-    _graph
-      .append("g")
-        .attr("class", "fg-axis fg-x-axis")
-        .attr("transform", "translate(0," + (height) + ")")
-        .call(xAxis)
-        .selectAll("text")
-          .attr("x", 0)
-          .attr("y", 10);
-
-    _graph
-      .append("g")
-        .attr("class", "fg-axis fg-y-axis")
-        .call(yAxis)
-        .selectAll("text")
-          .attr("x", -10)
-          .attr("y", 0);
-
-    // Style the graph
-    _graph.selectAll(".domain")
-      .attr("stroke", _config.styles.outerStrokeColor)
-      .attr("stroke-width", _config.styles.outerStrokeWidth)
-      .attr("fill", _config.styles.fillColor)
-      .attr("fill-opacity", _config.styles.fillOpacity);
-
-    _graph.selectAll(".fg-x-axis .tick")
-      .attr("stroke", _config.styles.innerStrokeColor)
-      .attr("stroke-width", (_config.type === "bar") ? 0 : _config.styles.innerStrokeWidth);
-
-    _graph.selectAll(".fg-y-axis .tick")
-      .attr("stroke", _config.styles.innerStrokeColor)
-      .attr("stroke-width", _config.styles.innerStrokeWidth);
-
-    _graph.selectAll(".fg-x-axis text")
-      .attr("stroke", "none")
-      .attr("fill", _config.styles.axes.x.ticks.fillColor)
-      .attr("font-size", _config.styles.axes.x.ticks.fontSize);
-
-    _graph.selectAll(".fg-y-axis text")
-      .attr("stroke", "none")
-      .attr("fill", _config.styles.axes.y.ticks.fillColor)
-      .attr("font-size", _config.styles.axes.y.ticks.fontSize);
-
-
-    // TODO: Use custom google font from https://www.google.com/fonts
-    // labels
-    _graph
-      .append("text")
-        .attr("class", "fg-axis-label fg-x-axis-label")
-        .attr("transform", "translate(0, 50)")
-        .attr("fill", _config.styles.axes.x.label.fillColor)
-        .attr("font-size", _config.styles.axes.x.label.fontSize)
-        .attr("font-weight", "bold")
-        .attr("dx", width)
-        .attr("dy", height)
-        .style("text-anchor", "end")
-        .text(_config.xCoord.label);
-
-    _graph
-      .append("text")
-        .attr("class", "fg-axis-label fg-y-axis-label")
-        .attr("transform", "rotate(-90)")
-        .attr("fill", _config.styles.axes.y.label.fillColor)
-        .attr("font-size", _config.styles.axes.y.label.fontSize)
-        .attr("font-weight", "bold")
-        .attr("dy", -margin.left + 16) // -margin.left will put it at 0, need to make room for text so add a bit for text size
-        .style("text-anchor", "end")
-        .text(_config.yCoord.label);
-
-    // reload the lines and datapoints
-    for (var series in _this.data) {
-      if (_this.data.hasOwnProperty(series)) {
-        var seriesIndex = _this.data[series].seriesIndex;
-        var coordinates = _this.data[series].values;
-
-        // if scales haven't changed, go ahead and add the new data point
-        switch (_config.type) {
-          case "line":
-            _drawLegend();
-            _drawLine(seriesIndex, coordinates);
-            _drawDataPoints(seriesIndex, coordinates);
-            break;
-          case "scatter":
-            _drawLegend();
-            _drawDataPoints(seriesIndex, coordinates);
-            break;
-          case "bar":
-            _drawBar(series, _this.data[series]);
-            break;
-        }
-      }
-    }
   }
 };
