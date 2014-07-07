@@ -138,6 +138,13 @@ var FireGrapher = function() {
           "style": "default",
           "strokeColors": defaultStrokeColors,
           "fillColors": defaultFillColors // What about if style is set to "flat"?
+        },
+        "legend": {
+          "fontSize": "16px",
+          "stroke": "#000000",
+          "strokeWidth": "2px",
+          "fill": "#AAAAAA",
+          "fillOpacity": 0.7
         }
       },
       "xCoord": {
@@ -852,8 +859,10 @@ var D3Graph = function(config, cssSelector) {
         .attr("y", y)
         .attr("width", legendWidth + margin.left + margin.right)
         .attr("height", legendHeight + margin.top + margin.bottom)
-        .style("stroke", "red")
-        .style("fill", "black");
+        .style("stroke", _config.styles.legend.stroke)
+        .style("stroke-width", _config.styles.legend.strokeWidth)
+        .style("fill", _config.styles.legend.fill)
+        .style("fill-opacity", _config.styles.legend.fillOpacity);
 
       // append the series name and appropriate stroke color
       gs.selectAll("text")
@@ -867,9 +876,11 @@ var D3Graph = function(config, cssSelector) {
           .attr("dx", legendWidth)
           .attr("dy", function(d, i) { return (i+1) * 20; })
           .style("text-anchor", "end")
-          .style("stroke", function(d, i) {
+          .style("stroke", "none")
+          .style("fill", function(d, i) {
             return _config.styles.series.strokeColors[i];
           })
+          .style("font-size", _config.styles.legend.fontSize)
           .text(function(d) {
             return d;
           });
