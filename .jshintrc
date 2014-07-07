@@ -2,7 +2,8 @@
   "predef": [
     "module",
     "require",
-    "Firebase"
+    "Firebase",
+    "google"
   ],
   "bitwise": true,
   "curly": true,

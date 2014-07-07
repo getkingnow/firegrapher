@@ -29,7 +29,7 @@ var FireGrapherParser = function(firebaseRef, config, d3Grapher) {
           };
           break;
         case "table":
-          var newDataPoint = [];
+          newDataPoint = [];
           _config.columns.forEach(function(column) {
             newDataPoint.push((typeof data[column.value] !== "undefined") ? data[column.value].toString() : "");
           });
@@ -217,7 +217,9 @@ var FireGrapherParser = function(firebaseRef, config, d3Grapher) {
   // Parse the path to an individual record
   var _pathToRecordTokens = _config.path.split("/");
 
-  if (d3Grapher instanceof FireGrapherD3 === false) {
+  if (d3Grapher instanceof D3Graph === false &&
+      d3Grapher instanceof D3Table === false &&
+      d3Grapher instanceof D3Map === false) {
     throw new Error("d3Grapher must be an instance of FireGrapherD3");
   }
   var _d3Grapher = d3Grapher;

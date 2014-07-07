@@ -181,10 +181,25 @@ var FireGrapher = function() {
     // to their default values
     _recursivelySetDefaults(config, _getDefaultConfig());
 
-    var d3Grapher = new FireGrapherD3(cssSelector, config);
+    var d3Grapher;
+    switch(config.type) {
+      case "line":
+      case "scatter":
+      case "bar":
+        d3Grapher = new D3Graph(config, cssSelector);
+        break;
+      case "map":
+        d3Grapher = new D3Map(config, cssSelector);
+        break;
+      case "table":
+        d3Grapher = new D3Table(config, cssSelector);
+        break;
+      default:
+        throw new Error("Invalid config type: " + config.type);
+    }
 
     // Initialize the graph
-    d3Grapher.initialize();
+    d3Grapher.init();
 
     var parser = new FireGrapherParser(firebaseRef, config, d3Grapher);
 

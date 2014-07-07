@@ -31,7 +31,7 @@ var paths = {
     src: {
       dir: "src/",
       files: [
-        "*.js"
+        "**/*.js"
       ]
     },
     dest: {
