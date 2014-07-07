@@ -196,6 +196,10 @@ var FireGrapher = function() {
     _recursivelySetDefaults(config, _getDefaultConfig());
 
     var d3Grapher = new FireGrapherD3(cssSelector, config);
+
+    // Initialize the graph
+    d3Grapher.initialize();
+
     var parser = new FireGrapherParser(firebaseRef, config, d3Grapher);
 
     var initialPathsToRecods = [{
@@ -204,9 +208,6 @@ var FireGrapher = function() {
     }];
     parser.parsePath(initialPathsToRecods, 0);
     //_parsePath(pathDicts, 0);
-
-    // Draw the graph
-    d3Grapher.draw();
   };
 
   /*****************/
@@ -254,9 +255,9 @@ var FireGrapherD3 = function(cssSelector, config) {
       // Draw each marker as a separate SVG element.
       _mapOverlay.draw = function() {
 
-        if (_mapPoints.length !== 0) {
+        if (_this.data.length !== 0) {
           var marker = layer.selectAll("svg")
-              .data(_mapPoints)
+              .data(_this.data)
               .each(transform) // update existing markers
             .enter().append("svg:svg")
               .each(transform)
@@ -375,7 +376,7 @@ var FireGrapherD3 = function(cssSelector, config) {
 
   function _drawLegend() {
     var series = [];
-    for (var k in _this.graphData) {
+    for (var k in _this.data) {
       if (k !== "undefined") {
         series.push(k);
       }
@@ -484,53 +485,7 @@ var FireGrapherD3 = function(cssSelector, config) {
         .attr("height", function(d) { return _yScale.range()[0] - _yScale(d.aggregation); });
   }
 
-
-  /*******************/
-  /*  PUBLIC METHODS */
-  /*******************/
-  // General Methods
-  this.draw = function() {
-    switch (_config.type) {
-      case "map":
-        _mapPoints = [];
-        _initMap();
-        this.drawMap();
-        break;
-      case "table":
-        _tableRows = [];
-        _table = d3.select(_cssSelector)
-          .append("div")
-            .attr("class", "table");
-        _addTableHeaders(_config.columns);
-        break;
-      case "bar":
-      case "line":
-      case "scatter":
-        this.graphData = {};
-        _xDomain = { min: Number.MAX_VALUE/2, max: Number.MIN_VALUE/2 };
-        _yDomain = { min: Number.MAX_VALUE/2, max: Number.MIN_VALUE/2 };
-        _numSeries = 0;
-
-        if (_config.type === "bar") {
-          _xScale = d3.scale.ordinal();
-        }
-        else {
-          _xScale = d3.scale.linear()
-            .domain([_xDomain.min, _xDomain.max]); // wait for first data point to auto-snap
-        }
-
-        _xScale
-          .range([0, _config.styles.size.width]);
-        _yScale = d3.scale.linear()
-          .domain([_yDomain.min, _yDomain.max]) // wait for first data point to auto-snap
-          .range([_config.styles.size.height, 0]);
-
-        this.drawGraph();
-        break;
-    }
-  };
-
-  this.drawGraph = function() {
+    function _drawGraph() {
     var margin = { top: 20, bottom: 30, left: 60, right: 20 };
     var height = _config.styles.size.height - margin.bottom - margin.top;
     var width = _config.styles.size.width - margin.left - margin.right;
@@ -650,10 +605,10 @@ var FireGrapherD3 = function(cssSelector, config) {
         .text(_config.yCoord.label);
 
     // reload the lines and datapoints
-    for (var series in _this.graphData) {
-      if (_this.graphData.hasOwnProperty(series)) {
-        var seriesIndex = _this.graphData[series].seriesIndex;
-        var coordinates = _this.graphData[series].values;
+    for (var series in _this.data) {
+      if (_this.data.hasOwnProperty(series)) {
+        var seriesIndex = _this.data[series].seriesIndex;
+        var coordinates = _this.data[series].values;
 
         // if scales haven't changed, go ahead and add the new data point
         switch (_config.type) {
@@ -667,101 +622,101 @@ var FireGrapherD3 = function(cssSelector, config) {
             _drawDataPoints(seriesIndex, coordinates);
             break;
           case "bar":
-            _drawBar(series, _this.graphData[series]);
+            _drawBar(series, _this.data[series]);
             break;
         }
       }
     }
-  };
+  }
 
-  FireGrapher.prototype.drawMap = function() {
+  function _drawMap() {
     _mapOverlay.draw();
-  };
+  }
 
-  this.addDataPointToBarGraph = function(newDataPoint) {
+  function _addDataPointToBarGraph(newDataPoint) {
     var redrawGraph = false;
     // if a series doesn't exist, create it
-    if (typeof _this.graphData[newDataPoint.series] === "undefined") {
+    if (typeof _this.data[newDataPoint.series] === "undefined") {
       redrawGraph = true;
       _numSeries += 1;
-      _this.graphData[newDataPoint.series] = {
+      _this.data[newDataPoint.series] = {
         seriesIndex: _numSeries,
         values : [],
         aggregation: 0
       };
       // x is an ordinal of all of the series, since a new one was introduced, add it
-      _xScale.domain(Object.keys(_this.graphData));
+      _xScale.domain(Object.keys(_this.data));
     }
-    _this.graphData[newDataPoint.series].values.push(newDataPoint.value);
+    _this.data[newDataPoint.series].values.push(newDataPoint.value);
     var aggtype = "median";
     var i = 0;
     switch(aggtype) {
       case "mean":
         var sum = 0;
-        for (; i < _this.graphData[newDataPoint.series].values.length; i++) {
-          sum += _this.graphData[newDataPoint.series].values[i];
+        for (; i < _this.data[newDataPoint.series].values.length; i++) {
+          sum += _this.data[newDataPoint.series].values[i];
         }
-        _this.graphData[newDataPoint.series].aggregation = sum / _this.graphData[newDataPoint.series].values.length;
+        _this.data[newDataPoint.series].aggregation = sum / _this.data[newDataPoint.series].values.length;
         break;
       case "median":
-        var tmpArray = _this.graphData[newDataPoint.series].values.slice(0); // slice will clone
+        var tmpArray = _this.data[newDataPoint.series].values.slice(0); // slice will clone
         tmpArray.sort(function(a, b) { return a-b; });
-        _this.graphData[newDataPoint.series].aggregation = tmpArray[Math.ceil(tmpArray.length / 2)];
+        _this.data[newDataPoint.series].aggregation = tmpArray[Math.ceil(tmpArray.length / 2)];
         break;
       case "min":
-        _this.graphData[newDataPoint.series].aggregation = Number.MAX_VALUE;
-        for (; i < _this.graphData[newDataPoint.series].values.length; i++) {
-          if (_this.graphData[newDataPoint.series].values[i] < _this.graphData[newDataPoint.series].aggregation) {
-            _this.graphData[newDataPoint.series].aggregation = _this.graphData[newDataPoint.series].values[i];
+        _this.data[newDataPoint.series].aggregation = Number.MAX_VALUE;
+        for (; i < _this.data[newDataPoint.series].values.length; i++) {
+          if (_this.data[newDataPoint.series].values[i] < _this.data[newDataPoint.series].aggregation) {
+            _this.data[newDataPoint.series].aggregation = _this.data[newDataPoint.series].values[i];
           }
         }
         break;
       case "max":
-        _this.graphData[newDataPoint.series].aggregation = Number.MIN_VALUE;
-        for (; i < _this.graphData[newDataPoint.series].values.length; i++) {
-          if (_this.graphData[newDataPoint.series].values[i] > _this.graphData[newDataPoint.series].aggregation) {
-            _this.graphData[newDataPoint.series].aggregation = _this.graphData[newDataPoint.series].values[i];
+        _this.data[newDataPoint.series].aggregation = Number.MIN_VALUE;
+        for (; i < _this.data[newDataPoint.series].values.length; i++) {
+          if (_this.data[newDataPoint.series].values[i] > _this.data[newDataPoint.series].aggregation) {
+            _this.data[newDataPoint.series].aggregation = _this.data[newDataPoint.series].values[i];
           }
         }
         break;
       case "sum":
-        _this.graphData[newDataPoint.series].aggregation += newDataPoint.value;
+        _this.data[newDataPoint.series].aggregation += newDataPoint.value;
         break;
       default: // default sum
-        _this.graphData[newDataPoint.series].aggregation += newDataPoint.value;
+        _this.data[newDataPoint.series].aggregation += newDataPoint.value;
         break;
     }
-    _this.graphData[newDataPoint.series].aggregation = (_this.graphData[newDataPoint.series].aggregation) ? _this.graphData[newDataPoint.series].aggregation : 0;
+    _this.data[newDataPoint.series].aggregation = (_this.data[newDataPoint.series].aggregation) ? _this.data[newDataPoint.series].aggregation : 0;
 
     redrawGraph = redrawGraph || _changeScales(
       // x is an ordinal, don't try to set min and max domains
       null,
       // y is based on 0 to the max value in values
-      [0, _this.graphData[newDataPoint.series].aggregation]);
+      [0, _this.data[newDataPoint.series].aggregation]);
     if (redrawGraph) {
       // if the scales have changed, we will redraw everything with the new data points
-      this.drawGraph();
+      _drawGraph();
     } else {
       // if scales haven't changed, go ahead and add the new data point
-      _drawBar(newDataPoint.series, _this.graphData[newDataPoint.series]);
+      _drawBar(newDataPoint.series, _this.data[newDataPoint.series]);
     }
-  };
+  }
 
-  this.addDataPointToGraph = function(newDataPoint) {
+  function _addDataPointToGraph(newDataPoint) {
     // TODO: BUG: there seem to be multiples of each data point for series 1+
     // if a series doesn't exist, create it
-    if (typeof _this.graphData[newDataPoint.series] === "undefined") {
-      _this.graphData[newDataPoint.series] = {
+    if (typeof _this.data[newDataPoint.series] === "undefined") {
+      _this.data[newDataPoint.series] = {
         seriesIndex: _numSeries,
         streamCount : 0,
         values : []
       };
       _numSeries += 1;
     }
-    _this.graphData[newDataPoint.series].streamCount += 1;
+    _this.data[newDataPoint.series].streamCount += 1;
 
     // Update the data at the datapoint
-    var coordinates = _this.graphData[newDataPoint.series].values;
+    var coordinates = _this.data[newDataPoint.series].values;
     coordinates.push(newDataPoint);
     if (coordinates.length > 1 && newDataPoint.xCoord <= coordinates[coordinates.length - 2].xCoord) {
       // need to sort because x coords are now out of order (so that our line doesn't plot backwards)
@@ -783,9 +738,9 @@ var FireGrapherD3 = function(cssSelector, config) {
 
     // if the scales have changed, we will redraw everything with the new data points
     if (redrawGraph) {
-      this.drawGraph();
+      _drawGraph();
     } else {
-      var seriesIndex = _this.graphData[newDataPoint.series].seriesIndex;
+      var seriesIndex = _this.data[newDataPoint.series].seriesIndex;
       _drawLegend();
       switch (_config.type) {
         case "line":
@@ -797,14 +752,14 @@ var FireGrapherD3 = function(cssSelector, config) {
           break;
       }
     }
-  };
+  }
 
-  this.addDataPointToMap = function(newDataPoint) {
-    _mapPoints.push(newDataPoint);
-    this.drawMap();
-  };
+  function _addDataPointToMap(newDataPoint) {
+    _this.data.push(newDataPoint);
+    _this.drawMap();
+  }
 
-  this.addDataPointToTable = function(newDataPoint) {
+  function _addDataPointToTable(newDataPoint) {
     _tableRows.push(newDataPoint);
     _table
       .selectAll("div.row")
@@ -821,6 +776,85 @@ var FireGrapherD3 = function(cssSelector, config) {
             .text(function(d) {
               return d;
             });
+  }
+
+
+  /*******************/
+  /*  PUBLIC METHODS */
+  /*******************/
+  // General Methods
+  this.initialize = function() {
+    switch (_config.type) {
+      case "map":
+        this.data = [];
+        _initMap();
+        break;
+      case "table":
+        _tableRows = [];
+        _table = d3.select(_cssSelector)
+          .append("div")
+            .attr("class", "table");
+        _addTableHeaders(_config.columns);
+        break;
+      case "bar":
+      case "line":
+      case "scatter":
+        this.data = {};
+        _xDomain = { min: Number.MAX_VALUE/2, max: Number.MIN_VALUE/2 };
+        _yDomain = { min: Number.MAX_VALUE/2, max: Number.MIN_VALUE/2 };
+        _numSeries = 0;
+
+        if (_config.type === "bar") {
+          _xScale = d3.scale.ordinal();
+        }
+        else {
+          _xScale = d3.scale.linear()
+            .domain([_xDomain.min, _xDomain.max]); // wait for first data point to auto-snap
+        }
+
+        _xScale
+          .range([0, _config.styles.size.width]);
+        _yScale = d3.scale.linear()
+          .domain([_yDomain.min, _yDomain.max]) // wait for first data point to auto-snap
+          .range([_config.styles.size.height, 0]);
+        break;
+    }
+
+    this.draw();
+  };
+
+  this.draw = function() {
+    switch (_config.type) {
+      case "map":
+        _drawMap();
+        break;
+      case "table":
+        break;
+      case "bar":
+      case "line":
+      case "scatter":
+        _drawGraph();
+        break;
+    }
+  };
+
+
+  this.addDataPoint = function(newDataPoint) {
+    switch (_config.type) {
+      case "map":
+        _addDataPointToMap(newDataPoint);
+        break;
+      case "table":
+        _addDataPointToTable(newDataPoint);
+        break;
+      case "bar":
+        _addDataPointToBarGraph(newDataPoint);
+        break;
+      case "line":
+      case "scatter":
+        _addDataPointToGraph(newDataPoint);
+        break;
+    }
   };
 
   /*****************/
@@ -832,7 +866,7 @@ var FireGrapherD3 = function(cssSelector, config) {
 
   var _xScale, _yScale, _xDomain, _yDomain;
   var _table, _tableRows;
-  var _mapPoints, _mapOverlay;
+  var _mapOverlay;
   var _numSeries;
 
   var _this = this;
@@ -854,49 +888,53 @@ var FireGrapherParser = function(firebaseRef, config, d3Grapher) {
     _firebaseRef.child(pathDict.path).on(eventToListenTo, function(childSnapshot) {
       var data = childSnapshot.val();
       var series;
+
+      var newDataPoint;
+
       switch (_config.type) {
         case "map":
-          _d3Grapher.addDataPointToMap({
+          newDataPoint = {
             "path": pathDict.path + childSnapshot.name(),
             "label": data[_config.marker.label],
             "radius": data[_config.marker.magnitude],
             "latitude": parseFloat(data[_config.marker.latitude]),
             "longitude": parseFloat(data[_config.marker.longitude])
-          });
+          };
           break;
         case "table":
           var newDataPoint = [];
           _config.columns.forEach(function(column) {
             newDataPoint.push((typeof data[column.value] !== "undefined") ? data[column.value].toString() : "");
           });
-          _d3Grapher.addDataPointToTable(newDataPoint);
           break;
         case "bar":
           series = (_config.series[0] === "$") ? pathDict.params[_config.series] : data[_config.series];
-          _d3Grapher.addDataPointToBarGraph({
+          newDataPoint = {
             "path": pathDict.path + childSnapshot.name(),
             "series": series,
             "value": parseInt(data[_config.value])
-          });
+          };
           break;
         case "line":
         case "scatter":
           series = (_config.series[0] === "$") ? pathDict.params[_config.series] : data[_config.series];
           var xCoord;
           if (typeof _config.xCoord.stream !== "undefined" && _config.xCoord.stream) {
-            xCoord = (_d3Grapher.graphData[series] && _d3Grapher.graphData[series].streamCount) ? _d3Grapher.graphData[series].streamCount : 0;
+            xCoord = (_d3Grapher.data[series] ? _d3Grapher.data[series].streamCount : 0);
           }
           else {
             xCoord = parseInt(data[_config.xCoord.value]);
           }
-          _d3Grapher.addDataPointToGraph({
+          newDataPoint = {
             "series": series,
             "path": pathDict.path + childSnapshot.name(),
             "xCoord": xCoord,
             "yCoord": parseInt(data[_config.yCoord.value])
-          });
+          };
           break;
       }
+
+      _d3Grapher.addDataPoint(newDataPoint);
     });
   }
 
@@ -905,24 +943,24 @@ var FireGrapherParser = function(firebaseRef, config, d3Grapher) {
       case "bar":
       case "line":
       case "scatter":
-        delete _d3Grapher.graphData[seriesName];
-        _d3Grapher.drawGraph();
+        delete _d3Grapher.data[seriesName];
         // TODO: want to make it so that we can remove the current series and re-use its series color
         // _d3Grapher.numSeries -= 1; // Doesn't work since only opens up the latest color, not the current series' color
         break;
     }
+
+    _d3Grapher.draw();
   }
 
   function _listenForRemovedRecords(pathDict) {
     switch (_config.type) {
       case "map":
         _firebaseRef.child(pathDict.path).on("child_removed", function(childSnapshot) {
-          _d3Grapher.mapPoints.forEach(function(dataPoint, index) {
+          _d3Grapher.data.forEach(function(dataPoint, index) {
             if (dataPoint.path === (pathDict.path + childSnapshot.name())) {
-              _d3Grapher.mapPoints.splice(index, 1);
+              _d3Grapher.data.splice(index, 1);
             }
           });
-          _d3Grapher.drawMap();
         });
         break;
       case "table":
@@ -932,43 +970,23 @@ var FireGrapherParser = function(firebaseRef, config, d3Grapher) {
       case "scatter":
         _firebaseRef.child(pathDict.path).on("child_removed", function(childSnapshot) {
           var series = (_config.series[0] === "$") ? pathDict.params[_config.series] : childSnapshot.val()[_config.series];
-          _d3Grapher.graphData[series].values.forEach(function(dataPoint, index) {
+          _d3Grapher.data[series].values.forEach(function(dataPoint, index) {
             if (dataPoint.path === (pathDict.path + childSnapshot.name())) {
-              var spliced = _d3Grapher.graphData[series].values.splice(index, 1);
+              var spliced = _d3Grapher.data[series].values.splice(index, 1);
               if (_config.type === "bar") {
-                _d3Grapher.graphData[series].sum -= spliced;
+                _d3Grapher.data[series].sum -= spliced;
               }
             }
           });
-
-          _d3Grapher.drawGraph();
         });
         break;
     }
+
+    _d3Grapher.draw();
   }
 
   function _listenForChangedRecords() {
     // TODO: implement
-    /*switch (_config.type) {
-      case "table":
-        break;
-      case "bar":
-      case "line":
-      case "scatter":
-        _firebaseRef.child(pathDict.path).on("child_removed", function(childSnapshot) {
-          var series = (_config.series[0] === "$") ? pathDict.params[_config.series] : childSnapshot.val()[_config.series];
-          _d3Grapher.graphData[series].values.forEach(function(dataPoint, index) {
-            if (dataPoint.path === (pathDict.path + childSnapshot.name())) {
-              var spliced = _d3Grapher.graphData[series].values.splice(index, 1);
-              if (_config.type === "bar") {
-                _d3Grapher.graphData[series].sum -= spliced;
-              }
-            }
-          });
-          _d3Grapher.drawGraph();
-        });
-        break;
-    }*/
   }
 
   /********************/

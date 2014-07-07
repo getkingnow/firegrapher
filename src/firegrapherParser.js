@@ -15,49 +15,53 @@ var FireGrapherParser = function(firebaseRef, config, d3Grapher) {
     _firebaseRef.child(pathDict.path).on(eventToListenTo, function(childSnapshot) {
       var data = childSnapshot.val();
       var series;
+
+      var newDataPoint;
+
       switch (_config.type) {
         case "map":
-          _d3Grapher.addDataPointToMap({
+          newDataPoint = {
             "path": pathDict.path + childSnapshot.name(),
             "label": data[_config.marker.label],
             "radius": data[_config.marker.magnitude],
             "latitude": parseFloat(data[_config.marker.latitude]),
             "longitude": parseFloat(data[_config.marker.longitude])
-          });
+          };
           break;
         case "table":
           var newDataPoint = [];
           _config.columns.forEach(function(column) {
             newDataPoint.push((typeof data[column.value] !== "undefined") ? data[column.value].toString() : "");
           });
-          _d3Grapher.addDataPointToTable(newDataPoint);
           break;
         case "bar":
           series = (_config.series[0] === "$") ? pathDict.params[_config.series] : data[_config.series];
-          _d3Grapher.addDataPointToBarGraph({
+          newDataPoint = {
             "path": pathDict.path + childSnapshot.name(),
             "series": series,
             "value": parseInt(data[_config.value])
-          });
+          };
           break;
         case "line":
         case "scatter":
           series = (_config.series[0] === "$") ? pathDict.params[_config.series] : data[_config.series];
           var xCoord;
           if (typeof _config.xCoord.stream !== "undefined" && _config.xCoord.stream) {
-            xCoord = (_d3Grapher.graphData[series] && _d3Grapher.graphData[series].streamCount) ? _d3Grapher.graphData[series].streamCount : 0;
+            xCoord = (_d3Grapher.data[series] ? _d3Grapher.data[series].streamCount : 0);
           }
           else {
             xCoord = parseInt(data[_config.xCoord.value]);
           }
-          _d3Grapher.addDataPointToGraph({
+          newDataPoint = {
             "series": series,
             "path": pathDict.path + childSnapshot.name(),
             "xCoord": xCoord,
             "yCoord": parseInt(data[_config.yCoord.value])
-          });
+          };
           break;
       }
+
+      _d3Grapher.addDataPoint(newDataPoint);
     });
   }
 
@@ -66,24 +70,24 @@ var FireGrapherParser = function(firebaseRef, config, d3Grapher) {
       case "bar":
       case "line":
       case "scatter":
-        delete _d3Grapher.graphData[seriesName];
-        _d3Grapher.drawGraph();
+        delete _d3Grapher.data[seriesName];
         // TODO: want to make it so that we can remove the current series and re-use its series color
         // _d3Grapher.numSeries -= 1; // Doesn't work since only opens up the latest color, not the current series' color
         break;
     }
+
+    _d3Grapher.draw();
   }
 
   function _listenForRemovedRecords(pathDict) {
     switch (_config.type) {
       case "map":
         _firebaseRef.child(pathDict.path).on("child_removed", function(childSnapshot) {
-          _d3Grapher.mapPoints.forEach(function(dataPoint, index) {
+          _d3Grapher.data.forEach(function(dataPoint, index) {
             if (dataPoint.path === (pathDict.path + childSnapshot.name())) {
-              _d3Grapher.mapPoints.splice(index, 1);
+              _d3Grapher.data.splice(index, 1);
             }
           });
-          _d3Grapher.drawMap();
         });
         break;
       case "table":
@@ -93,43 +97,23 @@ var FireGrapherParser = function(firebaseRef, config, d3Grapher) {
       case "scatter":
         _firebaseRef.child(pathDict.path).on("child_removed", function(childSnapshot) {
           var series = (_config.series[0] === "$") ? pathDict.params[_config.series] : childSnapshot.val()[_config.series];
-          _d3Grapher.graphData[series].values.forEach(function(dataPoint, index) {
+          _d3Grapher.data[series].values.forEach(function(dataPoint, index) {
             if (dataPoint.path === (pathDict.path + childSnapshot.name())) {
-              var spliced = _d3Grapher.graphData[series].values.splice(index, 1);
+              var spliced = _d3Grapher.data[series].values.splice(index, 1);
               if (_config.type === "bar") {
-                _d3Grapher.graphData[series].sum -= spliced;
+                _d3Grapher.data[series].sum -= spliced;
               }
             }
           });
-
-          _d3Grapher.drawGraph();
         });
         break;
     }
+
+    _d3Grapher.draw();
   }
 
   function _listenForChangedRecords() {
     // TODO: implement
-    /*switch (_config.type) {
-      case "table":
-        break;
-      case "bar":
-      case "line":
-      case "scatter":
-        _firebaseRef.child(pathDict.path).on("child_removed", function(childSnapshot) {
-          var series = (_config.series[0] === "$") ? pathDict.params[_config.series] : childSnapshot.val()[_config.series];
-          _d3Grapher.graphData[series].values.forEach(function(dataPoint, index) {
-            if (dataPoint.path === (pathDict.path + childSnapshot.name())) {
-              var spliced = _d3Grapher.graphData[series].values.splice(index, 1);
-              if (_config.type === "bar") {
-                _d3Grapher.graphData[series].sum -= spliced;
-              }
-            }
-          });
-          _d3Grapher.drawGraph();
-        });
-        break;
-    }*/
   }
 
   /********************/

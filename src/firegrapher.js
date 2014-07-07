@@ -182,6 +182,10 @@ var FireGrapher = function() {
     _recursivelySetDefaults(config, _getDefaultConfig());
 
     var d3Grapher = new FireGrapherD3(cssSelector, config);
+
+    // Initialize the graph
+    d3Grapher.initialize();
+
     var parser = new FireGrapherParser(firebaseRef, config, d3Grapher);
 
     var initialPathsToRecods = [{
@@ -190,9 +194,6 @@ var FireGrapher = function() {
     }];
     parser.parsePath(initialPathsToRecods, 0);
     //_parsePath(pathDicts, 0);
-
-    // Draw the graph
-    d3Grapher.draw();
   };
 
   /*****************/
