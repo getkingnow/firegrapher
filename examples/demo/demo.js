@@ -1,5 +1,31 @@
 $(function() {
-  $("#mainMenuScreenshot").fadeIn(1000, function() {
+  /************/
+  /*  GRAPHS  */
+  /************/
+    var firebaseRef = new Firebase("https://FireGrapherStocks.firebaseIO-demo.com/");
+  var fireGrapher1 = new FireGrapher(firebaseRef.child("stocks"), "#graph1", {
+    type : "line",
+    path: "$symbol/*",
+    title: "Price over Time (Stocks in USD)",
+    xCoord: {
+      "label" : "Time",
+      "value" : "time",
+      "min": 0,
+      "max": 30
+    },
+    yCoord: {
+      "label" : "Price",
+      "value" : "price",
+      "min": 40,
+      "max": 150
+    },
+    series: "$symbol"
+  });
+
+
+
+
+  $("#graph1").fadeIn(1000, function() {
     $(this).attr("style", "display: block");
   });
 
@@ -9,7 +35,7 @@ $(function() {
     var windowWidth = $(window).width();
 
     var scrollButtonRotation;
-    if ((scrollBottom - 50 - $("#scrollButton").height()) > $("#copyrightSection").offset().top) {
+    if ((scrollBottom  - 500- $("#scrollButton").height()) > $("#section4").offset().top) {
       scrollButtonRotation = "rotate(180deg)";
       $("#scrollButton").addClass("rotated");
     }
@@ -101,47 +127,34 @@ $(function() {
     // Get the scroll bar's bottom position (top + height + padding)
     var scrollButtonBottom = $(this).offset().top + $(this).height() + 50 + 300;
 
-    var mainSectionTop = $("#mainSection").offset().top;
-    var gameBoardSectionTop = $("#gameBoardSection").offset().top;
-    var savedGamesSectionTop = $("#savedGamesSection").offset().top;
-    var highScoresSectionTop = $("#highScoresSection").offset().top;
-    var recapSectionTop = $("#recapSection").offset().top;
-    var emailFormSectionTop = $("#emailFormSection").offset().top;
-    var copyrightSectionTop = $("#copyrightSection").offset().top;
+    var section1Top = $("#section1").offset().top;
+    var section2Top = $("#section2").offset().top;
+    var section3Top = $("#section3").offset().top;
+    var section4Top = $("#section4").offset().top;
 
-    if (scrollButtonBottom <= mainSectionTop + $("#mainSection").height()) {
+    if (scrollButtonBottom <= section1Top + $("#section1").height()) {
       $("html, body").animate({
-        scrollTop: gameBoardSectionTop
+        scrollTop: section2Top
       }, 750);
     }
-    else if (scrollButtonBottom < gameBoardSectionTop + $("#gameBoardSection").height()) {
+    else if (scrollButtonBottom < section2Top + $("#section2").height()) {
       $("html, body").animate({
-        scrollTop: gameBoardSectionTop
+        scrollTop: section2Top
       }, 750);
     }
-    else if (scrollButtonBottom < savedGamesSectionTop + $("#savedGamesSection").height()) {
+    else if (scrollButtonBottom < section3Top + $("#section3").height()) {
       $("html, body").animate({
-        scrollTop: savedGamesSectionTop
+        scrollTop: section3Top
       }, 750);
     }
-    else if (scrollButtonBottom < highScoresSectionTop + $("#highScoresSection").height()) {
+    else if (scrollButtonBottom < section4Top + $("#section4").height()) {
       $("html, body").animate({
-        scrollTop: highScoresSectionTop
-      }, 750);
-    }
-    else if (scrollButtonBottom < recapSectionTop + $("#recapSection").height()) {
-      $("html, body").animate({
-        scrollTop: recapSectionTop
-      }, 750);
-    }
-    else if (scrollButtonBottom < emailFormSectionTop + $("#emailFormSection").height()) {
-      $("html, body").animate({
-        scrollTop: emailFormSectionTop
+        scrollTop: section4Top
       }, 750);
     }
     else if ($(this).hasClass("rotated")) {
       $("html, body").animate({
-        scrollTop: mainSectionTop
+        scrollTop: section1Top
       }, 750);
     }
     else {
@@ -150,40 +163,4 @@ $(function() {
       }, 750);
     }
   });
-
-  /* Adds the email in the email form to the database */
-  $("#emailFormSubmitButton").on("click", addEmailToDatabase);
-  function addEmailToDatabase() {
-    // If the email is valid, add the email to the database
-    var email = $("#emailInput").val();
-
-    // Remove the click event from the form's submit button so we don't accidentally add the same email twice
-    $("#emailFormSubmitButton").off("click");
-
-    // Add the email to the database
-    $.ajax({
-      type: "POST",
-      url: "../php/addEmail.php",
-      dataType: "text",
-      data: {
-        email: email
-      },
-      success: function (response) {
-        // If we successfully inserted the email into the database, show the success message
-        if (response == "success") {
-          $("#emailForm").fadeOut(400, function() {
-            $("#emailFormSuccessMessage").fadeIn(400);
-          });
-        }
-
-        // Otherwise, show the invalid email warning and turn the click event listener back on for the form's submit button
-        else {
-          $("#invalidEmailWarning").fadeIn(400);
-          $("#emailFormSubmitButton").on("click", addEmailToDatabase);
-        }
-      },
-      error: function (xhr, ajaxOptions, thrownError){
-      }
-    });
-  };
 });

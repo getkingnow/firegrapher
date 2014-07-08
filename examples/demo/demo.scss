@@ -6,15 +6,6 @@ $primaryColor2: #E74C3C;
 $primaryColor3: #9B59B6;
 
 
-/******************/
-/*  CUSTOM FONTS  */
-/******************/
-@font-face {
-  font-family: "GeoSansLight";
-  src: url("../resources/fonts/GeoSansLight.ttf");
-}
-
-
 /***************/
 /*  NORMALIZE  */
 /***************/
@@ -42,62 +33,49 @@ html, body {
   width: device-width;
 }
 
-
 /**************/
 /*  SECTIONS  */
 /**************/
-#mainSection, #gameBoardSection, #savedGamesSection, #highScoresSection, #recapSection {
+.section {
   position: relative;
   height: 100%;
   min-height: 800px;
 }
 
-#emailFormSection {
-  position: relative;
-  height: 500px;
-  min-height: 500px;
-}
-
-#copyrightSection {
-  position: relative;
-  height: 200px;
-  min-height: 200px;
-}
-
-#mainSection, #savedGamesSection, #copyrightSection  {
+#section1, #section3 {
   background-color: $primaryColor2;
 }
 
-#gameBoardSection, #highScoresSection, #emailFormSection {
+#section2, #section4 {
   background-color: $primaryColor1;
 }
 
-#recapSection {
-  background-image: url("../resources/images/woodBackground.png");
-}
-
-%sectionScreenshot {
+%sectionGraph {
   position: absolute;
   display: block;
   top: 50%;
-  width: 724px;
+  width: 700px;
+  height: 500px;
+  display: block;
   margin: 0;
+  padding: 0;
+  font-family: "Roboto Slab", serif;
 }
 
-%sectionScreenshotCenter {
-  @extend %sectionScreenshot;
+%sectionGraphCenter {
+  @extend %sectionGraph;
   left: 50%;
-  margin: -250px 0 0 -362px;
+  margin: -250px 0 0 -350px;
 }
 
-%sectionScreenshotLeft {
-  @extend %sectionScreenshot;
+%sectionGraphLeft {
+  @extend %sectionGraph;
   left: 50%;
   margin-left: -600px;
 }
 
-%sectionScreenshotRight {
-  @extend %sectionScreenshot;
+%sectionGraphRight {
+  @extend %sectionGraph;
   right: 50%;
   margin-right: -600px;
 }
@@ -210,18 +188,17 @@ html, body {
   clear: both;
 }
 
-#mainMenuScreenshot {
-  @extend %sectionScreenshotCenter;
-  display: none;
+/************/
+/*  GRAPHS  */
+/************/
+#graph1 {
+  @extend %sectionGraphCenter;
+  //display: none;
 }
 
-
-/************************/
-/*  GAME BOARD SECTION  */
-/************************/
-#gameBoardSection {
+#section2 {
   img {
-    @extend %sectionScreenshotLeft;
+    @extend %sectionGraphLeft;
     opacity: 0;
     margin-top: -211px;
   }
@@ -234,13 +211,9 @@ html, body {
   }
 }
 
-
-/*************************/
-/*  SAVED GAMES SECTION  */
-/*************************/
-#savedGamesSection {
+#section3 {
   img {
-    @extend %sectionScreenshotRight;
+    @extend %sectionGraphRight;
     opacity: 0;
     margin-top: -266px;
   }
@@ -253,13 +226,9 @@ html, body {
   }
 }
 
-
-/*************************/
-/*  HIGH SCORES SECTION  */
-/*************************/
-#highScoresSection {
+#section4 {
   img {
-    @extend %sectionScreenshotLeft;
+    @extend %sectionGraphLeft;
     opacity: 0;
     margin-top: -228px;
   }
@@ -269,197 +238,5 @@ html, body {
     height: 180px;
     margin-top: -90px;
     opacity: 0;
-  }
-}
-
-
-/*******************/
-/*  RECAP SECTION  */
-/*******************/
-#recapSection {
-  div {
-    position: absolute;
-    display: block;
-    top: 50%;
-    margin-top: -300px;
-    left: 50%;
-    margin-left: -230px;
-    width: 460px;
-    height: 600px;
-  }
-
-  #rusticCitrusColorLogo {
-    display: block;
-    margin: 0 auto 0 auto;
-    width: 460px;
-  }
-
-  #windowsStoreBadge {
-    @extend %badge;
-  }
-
-  #playOnlineBadge {
-    @extend %badge;
-  }
-}
-
-%badge {
-  display: block;
-  width: 460px;
-  margin: 32px auto 0 auto;
-  opacity: 0.8;
-
-  &:hover {
-    opacity: 0.9;
-  }
-
-  &:active {
-    opacity: 1.0;
-  }
-}
-
-/************************/
-/*  EMAIL FORM SECTION  */
-/************************/
-#emailForm {
-  position: absolute;
-  width: 500px;
-  height: 260px;
-  top: 50%;
-  left: 50%;
-  margin: -130px 0 0 -250px;
-}
-
-#emailFormSuccessMessage {
-  position: absolute;
-  width: 500px;
-  height: 90px;
-  top: 50%;
-  left: 50%;
-  margin: -45px 0 0 -250px;
-  color: #FFF;
-  font-size: 36px;
-  font-family: "GeoSansLight";
-  text-align: center;
-  display: none;
-}
-
-#emailFormMessage {
-  color: #FFF;
-  font-family: "GeoSansLight";
-  font-size: 36px;
-  text-align: center;
-}
-
-#invalidEmailWarning {
-  display: none;
-  color: #FFF;
-  font-family: "Verdana";
-  font-size: 14px;
-  margin-top: 7px;
-}
-
-#emailPolicy {
-  color: #FFF;
-  font-family: "Verdana";
-  font-size: 14px;
-  margin-top: 5px;
-}
-
-#emailForm input {
-  display: block;
-  line-height: 1.5;
-  line-height: 1.0\0; /* IE hack */
-  font-family: "Verdana";
-  font-size: 1.4em;
-  margin: 30px 0 0 0;
-  padding: 10px 10px 10px 10px;
-  color: $primaryColor2;
-  width: 475px;
-  border: 3px solid #FFF;
-  background: transparent;
-
-  &:focus {
-    outline: none;
-  }
-}
-
-#emailForm #emailFormSubmitButton {
-  display: block;
-  background: transparent;
-  color: #fff;
-  width: 70px;
-  cursor: pointer;
-  padding: 15px 30px 15px 30px;
-  margin: 40px auto 0 auto;
-  font-family: "Verdana";
-  font-size: 1.1em;
-  border-radius: 5px;
-  border: solid 2px #FFFFFF;
-  text-align: center;
-
-  &:hover {
-    border-width: 0px;
-    padding: 17px 32px 17px 32px;
-    background: $primaryColor1;
-    opacity: 0.9;
-  }
-
-  &:active {
-    opacity: 1;
-  }
-}
-
-::-webkit-input-placeholder { /* WebKit browsers */
-  color: #FFFFFF;
-  font-style: italic;
-}
-
-:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
-  color: #FFFFFF;
-  font-style: italic;
-}
-
-::-moz-placeholder { /* Mozilla Firefox 19+ */
-  color: #FFFFFF;
-  font-style: italic;
-}
-
-:-ms-input-placeholder { /* Internet Explorer 10+ */
-  color: #FFFFFF;
-  font-style: italic;
-}
-
-/***********************/
-/*  COPYRIGHT SECTION  */
-/***********************/
-#copyrightSection {
-  div {
-    position: absolute;
-    display: block;
-    top: 50%;
-    left: 50%;
-    width: 334px;
-    height: 150px;
-    margin: -75px 0 0 -167px;
-  }
-
-  p {
-    position: relative;
-    float: left;
-    line-height: 20px;
-    top: 50%;
-    margin: -10px 10px 0 0;
-    color: #FFF;
-    font-family: "Verdana";
-    font-size: 15px;
-  }
-
-  #floatingHouseStudiosLogo {
-    position: relative;
-    float: right;
-    height: 100px;
-    top: 50%;
-    margin: -50px 0 0 0;
   }
 }
