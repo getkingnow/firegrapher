@@ -179,7 +179,9 @@ var FireGrapherParser = function(firebaseRef, config, grapher) {
       case "bar":
       case "line":
       case "scatter":
-        delete _grapher.data[seriesName];
+        if (typeof _grapher.data[seriesName] !== 'undefined') {
+          _grapher.data[seriesName].values = [];  
+        }
         // TODO: want to make it so that we can remove the current series and re-use its series color
         // _grapher.numSeries -= 1; // Doesn't work since only opens up the latest color, not the current series' color
         break;

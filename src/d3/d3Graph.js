@@ -59,7 +59,6 @@ var D3Graph = function(config, cssSelector) {
           .attr("height", _config.styles.size.height)
           .append("g")
             .attr("transform", "translate("+margin.left+", "+margin.bottom+")");
-
       // append graph title
       if (_config.title) {
         _graph.append("text")
@@ -139,27 +138,23 @@ var D3Graph = function(config, cssSelector) {
       _graph.selectAll("g.fg-y-axis")
         .call(yAxis);
     }
-    
+
     // Style the graph
     _graph.selectAll(".domain")
       .attr("stroke", _config.styles.outerStrokeColor)
       .attr("stroke-width", _config.styles.outerStrokeWidth)
       .attr("fill", _config.styles.fillColor)
       .attr("fill-opacity", _config.styles.fillOpacity);
-
     _graph.selectAll(".fg-x-axis .tick")
       .attr("stroke", _config.styles.innerStrokeColor)
       .attr("stroke-width", (_config.type === "bar") ? 0 : _config.styles.innerStrokeWidth);
-
-    _graph.selectAll(".fg-y-axis .tick")
-      .attr("stroke", _config.styles.innerStrokeColor)
-      .attr("stroke-width", _config.styles.innerStrokeWidth);
-
     _graph.selectAll(".fg-x-axis text")
       .attr("stroke", "none")
       .attr("fill", _config.styles.axes.x.ticks.fillColor)
       .attr("font-size", _config.styles.axes.x.ticks.fontSize);
-
+    _graph.selectAll(".fg-y-axis .tick")
+      .attr("stroke", _config.styles.innerStrokeColor)
+      .attr("stroke-width", _config.styles.innerStrokeWidth);
     _graph.selectAll(".fg-y-axis text")
       .attr("stroke", "none")
       .attr("fill", _config.styles.axes.y.ticks.fillColor)
@@ -185,6 +180,9 @@ var D3Graph = function(config, cssSelector) {
           case "bar":
             _drawBar(series, _this.data[series]);
             break;
+        }
+        if (coordinates.length === 0) {
+          delete _this.data[series];
         }
       }
     }
@@ -437,24 +435,31 @@ var D3Graph = function(config, cssSelector) {
         return _yScale(value.yCoord);
       });
 
-    // update the graph with the area based on the data
-    var areaObj = _graph
-      .selectAll("path.fg-area-" + seriesIndex)
-        .data([dataPoints]);
-    // this should only enter once (first creation)
-    areaObj
-      .enter().append("path")
-        .attr("class", "fg-area fg-area-" + seriesIndex)
-        .attr("stroke", _config.styles.series.strokeColors[seriesIndex])  // What if more series than colors?
-        .attr("stroke-width", _config.styles.series.strokeWidth)
-        .attr("fill", _config.styles.series.strokeColors[seriesIndex])
-        .attr("fill-opacity", 0.5);
-    // this should never exit, but if it does, remove it
-    areaObj
-      .exit().remove();
-    // update the area
-    areaObj
-      .attr("d", area(dataPoints));
+    if (dataPoints.length !== 0) {
+      // update the graph with the area based on the data
+      var areaObj = _graph
+        .selectAll("path.fg-area-" + seriesIndex)
+          .data([dataPoints]);
+      // this should only enter once (first creation)
+      areaObj
+        .enter().append("path")
+          .attr("class", "fg-area fg-area-" + seriesIndex)
+          .attr("stroke", _config.styles.series.strokeColors[seriesIndex])  // What if more series than colors?
+          .attr("stroke-width", _config.styles.series.strokeWidth)
+          .attr("fill", _config.styles.series.strokeColors[seriesIndex])
+          .attr("fill-opacity", 0.5);
+      // this should never exit, but if it does, remove it
+      areaObj
+        .exit().remove();
+      // update the area
+      areaObj
+        .attr("d", area(dataPoints));
+    } else {
+      // if there's no data, remove the path element
+      _graph
+        .selectAll("path.fg-area-" + seriesIndex)
+          .remove();
+    }
   }
 
   function _drawDataPoints(seriesIndex, dataPoints) {
