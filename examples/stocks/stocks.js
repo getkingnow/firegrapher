@@ -91,8 +91,7 @@
   document.getElementById("startJacobcoinButton").addEventListener("click", startJacobcoin);
   document.getElementById("stopJacobcoinButton").addEventListener("click", stopJacobcoin);
 
-  var fireGrapher1 = new FireGrapher();
-  fireGrapher1.graph("#stockChart1", firebaseRef.child("stocks"), {
+  var fireGrapher1 = new FireGrapher(firebaseRef.child("stocks"), "#stockChart1", {
     type : "line",
     path: "$symbol/*",
     title: "Price over Time (Stocks in USD)",
@@ -111,8 +110,7 @@
     series: "$symbol"
   });
 
-  var fireGrapher2 = new FireGrapher();
-  fireGrapher2.graph("#stockChart2", firebaseRef.child("stocks2"), {
+  var fireGrapher2 = new FireGrapher(firebaseRef.child("stocks2"), "#stockChart2", {
     type : "scatter",
     path: "*",
     xCoord: {
@@ -207,8 +205,7 @@
     }
   });
 
-  var fireGrapher3 = new FireGrapher();
-  fireGrapher3.graph("#userTable", firebaseRef.child("users"), {
+  var fireGrapher3 = new FireGrapher(firebaseRef.child("users"), "#userTable", {
     type : "table",
     path: "$userId",
     columns: [
@@ -221,8 +218,7 @@
   });
 
 
-  var fireGrapher4 = new FireGrapher();
-  fireGrapher4.graph("#jacobcoinChart", firebaseRef, {
+  var fireGrapher4 = new FireGrapher(firebaseRef, "#jacobcoinChart", {
     type : "line",
     path: "jacobcoin",
     xCoord: {
@@ -257,8 +253,7 @@
   });
 
   var currencyRef = new Firebase("https://publicdata-cryptocurrency.firebaseio.com/");
-  var fireGrapher5 = new FireGrapher();
-  fireGrapher5.graph("#digitalCurrencyChart", currencyRef, {
+  var fireGrapher5 = new FireGrapher(currencyRef, "#digitalCurrencyChart", {
     type : "line",
     path: "bitcoin",
     xCoord: {
@@ -281,8 +276,7 @@
     series: "$currency"
   });
 
-  var fireGrapher6 = new FireGrapher();
-  fireGrapher6.graph("#stockChart6", firebaseRef.child("stocks"), {
+  var fireGrapher6 = new FireGrapher(firebaseRef.child("stocks"), "#stockChart6", {
     type : "bar",
     path: "$symbol/*",
     xCoord: {
