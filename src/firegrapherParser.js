@@ -29,6 +29,10 @@ var FireGrapherParser = function(firebaseRef, config, grapher) {
   // Parse the path to an individual record
   var _pathToRecordTokens = _config.path.split("/");
 
+  // Store references to all firebase listeners so that we can remove them when there is 
+  // no more data
+  var _seriesListeners = {};
+
   /********************/
   /*  PUBLIC METHODS  */
   /********************/
@@ -79,6 +83,8 @@ var FireGrapherParser = function(firebaseRef, config, grapher) {
               "path": pathDict.path + childSnapshot.name() + "/",
               "params": {}
             };
+            newPathDict.pathArray = [].concat(pathDict.pathArray)
+            newPathDict.pathArray.push(childSnapshot.name());
 
             // Create the params object for the new path dictionary
             newPathDict.params[node] = childSnapshot.name();
@@ -93,9 +99,14 @@ var FireGrapherParser = function(firebaseRef, config, grapher) {
           }.bind(this));
 
           // Remove series from the graph when they are removed from Firebase
-          _firebaseRef.child(pathDict.path).on("child_removed", function(childSnapshot) {
-            _removeSeries(childSnapshot.name());
-          });
+          (function(pathArray) {
+            _firebaseRef.child(pathDict.path).on("child_removed", function(childSnapshot) {
+              var array = [].concat(pathArray);
+              array.push(childSnapshot.name());
+              _removeSeries(childSnapshot.name(), array);
+            });
+          })(pathDict.pathArray);
+          
         }.bind(this));
       }
 
@@ -104,10 +115,13 @@ var FireGrapherParser = function(firebaseRef, config, grapher) {
         // Append the current node to each path
         var newPathDicts = [];
         pathDicts.forEach(function(pathDict) {
-          newPathDicts.push({
+          var newPathDict = {
             "path": pathDict.path + node + "/",
             "params": pathDict.params
-          });
+          };
+          newPathDict.pathArray = [].concat(pathDict.pathArray);
+          newPathDict.pathArray.push(node);
+          newPathDicts.push(newPathDict);
         });
 
         // Recursively parse the path at the next level
@@ -121,7 +135,10 @@ var FireGrapherParser = function(firebaseRef, config, grapher) {
   /********************/
   function _listenForNewRecords(pathDict, eventToListenTo) {
     _this.pathsToRecords.push(pathDict);
-    _firebaseRef.child(pathDict.path).on(eventToListenTo, function(childSnapshot) {
+    if (typeof _seriesListeners[pathDict.pathArray.join()] === 'undefined') {
+      _seriesListeners[pathDict.pathArray.join()] = {};
+    }
+    _seriesListeners[pathDict.pathArray.join()][eventToListenTo] = _firebaseRef.child(pathDict.path).on(eventToListenTo, function(childSnapshot) {
       var data = childSnapshot.val();
       var series;
 
@@ -174,17 +191,18 @@ var FireGrapherParser = function(firebaseRef, config, grapher) {
     });
   }
 
-  function _removeSeries(seriesName) {
+  function _removeSeries(seriesName, pathArray) {
     switch (_config.type) {
       case "bar":
-        if (typeof _grapher.data[seriesName] !== 'undefined') {
-          delete _grapher.data[seriesName].aggregation;
-        }
+        delete _grapher.data[seriesName].aggregation;
       case "line":
       case "scatter":
-        if (typeof _grapher.data[seriesName] !== 'undefined') {
-          delete _grapher.data[seriesName].values;
-        }
+        delete _grapher.data[seriesName].values;
+        // remove all listeners for the series being removed
+        Object.keys(_seriesListeners[pathArray.join()]).forEach(function(eventType) {
+          var fn = _seriesListeners[pathArray.join()][eventType];
+          _firebaseRef.child(pathArray.join('/')).off(eventType, fn);
+        });
         // TODO: want to make it so that we can remove the current series and re-use its series color
         // _grapher.numSeries -= 1; // Doesn't work since only opens up the latest color, not the current series' color
         break;
@@ -210,10 +228,10 @@ var FireGrapherParser = function(firebaseRef, config, grapher) {
       case "bar":
       case "line":
       case "scatter":
-        console.log(pathDict.path);
-        _firebaseRef.child(pathDict.path).on("child_removed", function(childSnapshot) {
-          console.dir(_grapher.data);
-          console.log("child_removed");
+        if (typeof _seriesListeners[pathDict.pathArray.join()] === 'undefined') {
+          _seriesListeners[pathDict.pathArray.join()] = {};
+        }
+        _seriesListeners[pathDict.pathArray.join()]['child_removed'] = _firebaseRef.child(pathDict.path).on("child_removed", function(childSnapshot) {
           var series = (_config.series[0] === "$") ? pathDict.params[_config.series] : childSnapshot.val()[_config.series];
           _grapher.data[series].values.forEach(function(dataPoint, index) {
             if (dataPoint.path === (pathDict.path + childSnapshot.name())) {
