@@ -21,6 +21,52 @@ var FireGrapher = (function() {
    * param {object} config A collection of graph configuration options.
    */
 var FireGrapher = function(firebaseRef, cssSelector, config) {
+  /*****************/
+  /*  CONSTRUCTOR  */
+  /*****************/
+  // Validate the inputs
+  _validateFirebaseRef(firebaseRef);
+  _validateCssSelector(cssSelector);
+  _validateConfig(config);
+
+  // Recursively loop through the global config object and set any unspecified options
+  // to their default values
+  _recursivelySetDefaults(config, _getDefaultConfig());
+  var el = document.querySelector(cssSelector);
+  config.styles.size = {
+    width: el.clientWidth,
+    height: el.clientHeight
+  };
+
+  var d3Grapher;
+  switch(config.type) {
+    case "line":
+    case "scatter":
+    case "bar":
+      d3Grapher = new D3Graph(config, cssSelector);
+      break;
+    case "map":
+      d3Grapher = new D3Map(config, cssSelector);
+      break;
+    case "table":
+      d3Grapher = new D3Table(config, cssSelector);
+      break;
+    default:
+      throw new Error("Invalid config type: " + config.type);
+  }
+
+  // Initialize the graph
+  d3Grapher.init();
+
+  var parser = new FireGrapherParser(firebaseRef, config, d3Grapher);
+
+  var initialPathsToRecods = [{
+    "path": "/",
+    "params": {}
+  }];
+  parser.parsePath(initialPathsToRecods, 0);
+  //_parsePath(pathDicts, 0);
+
   /********************/
   /*  PRIVATE METHODS */
   /********************/
@@ -154,7 +200,7 @@ var FireGrapher = function(firebaseRef, cssSelector, config) {
     var defaultFillColors = ["#28E1BC", "#ED7469", "#B07CC6", "#5FAEE3", "#F4D03F", "#FF6607", "#54D98B", "#EB9850", "#3E5771", "#D65448"];
 
     // Define a default config object
-    return {
+    var configDefaults = {
       "styles": {
         "fillColor": "#DDDDDD",
         "fillOpacity": 0.3,
@@ -220,6 +266,8 @@ var FireGrapher = function(firebaseRef, cssSelector, config) {
         "magnitude" : "radius"
       }
     };
+
+    return configDefaults;
   }
 
   /**
@@ -239,55 +287,6 @@ var FireGrapher = function(firebaseRef, cssSelector, config) {
       //outputConfig[key] = outputConfig[key] || defaultConfig[key];
     }
   }
-
-  /*****************/
-  /*  CONSTRUCTOR  */
-  /*****************/
-  // Validate the inputs
-  _validateFirebaseRef(firebaseRef);
-  _validateCssSelector(cssSelector);
-  _validateConfig(config);
-
-  // Recursively loop through the global config object and set any unspecified options
-  // to their default values
-  _recursivelySetDefaults(config, _getDefaultConfig());
-  var el = document.querySelector(cssSelector);
-  config.styles.size = {
-    width: el.clientWidth,
-    height: el.clientHeight
-  };
-
-  var d3Grapher;
-  switch(config.type) {
-    case "line":
-    case "scatter":
-    case "bar":
-      d3Grapher = new D3Graph(config, cssSelector);
-      break;
-    case "map":
-      d3Grapher = new D3Map(config, cssSelector);
-      break;
-    case "table":
-      d3Grapher = new D3Table(config, cssSelector);
-      break;
-    default:
-      throw new Error("Invalid config type: " + config.type);
-  }
-
-  // Initialize the graph
-  d3Grapher.init();
-
-  var parser = new FireGrapherParser(firebaseRef, config, d3Grapher);
-
-  var initialPathsToRecords = [{
-    "path": "/",
-    "params": {}
-  }];
-  parser.parsePath(initialPathsToRecords, 0);
-
-  //console.log(initialPathsToRecords);
-  //_parsePath(pathDicts, 0);
-
 };
 /**
  * Creates a FireGrapherParser instance.
@@ -296,27 +295,116 @@ var FireGrapher = function(firebaseRef, cssSelector, config) {
  * @this {FireGrapherParser}
  * @param {Firebase} firebaseRef A Firebase reference from where the FireGrapher data will be read.
  * @param {object} config A list of options and styles which explain what the graph and how to style the graph.
- * @param {FireGrapherD3} grapher Grapher instance used to draw the data.
+ * @param {FireGrapherD3} d3Grapher Grapher instance used to draw via d3.
  */
-var FireGrapherParser = function(firebaseRef, config, grapher) {
-  /*****************/
-  /*  CONSTRUCTOR  */
-  /*****************/
-  var _firebaseRef = firebaseRef;
-  var _config = config;
-  var _this = this;
+var FireGrapherParser = function(firebaseRef, config, d3Grapher) {
+  /********************/
+  /*  PRIVATE METHODS */
+  /********************/
+  function _listenForNewRecords(pathDict, eventToListenTo) {
+    _firebaseRef.child(pathDict.path).on(eventToListenTo, function(childSnapshot) {
+      var data = childSnapshot.val();
+      var series;
 
-  this.pathsToRecords = [];
+      var newDataPoint;
 
-  // Parse the path to an individual record
-  var _pathToRecordTokens = _config.path.split("/");
+      switch (_config.type) {
+        case "map":
+          newDataPoint = {
+            "path": pathDict.path + childSnapshot.name(),
+            "label": data[_config.marker.label],
+            "radius": data[_config.marker.magnitude],
+            "latitude": parseFloat(data[_config.marker.latitude]),
+            "longitude": parseFloat(data[_config.marker.longitude])
+          };
+          break;
+        case "table":
+          newDataPoint = [];
+          _config.columns.forEach(function(column) {
+            newDataPoint.push((typeof data[column.value] !== "undefined") ? data[column.value].toString() : "");
+          });
+          break;
+        case "bar":
+          series = (_config.series[0] === "$") ? pathDict.params[_config.series] : data[_config.series];
+          newDataPoint = {
+            "path": pathDict.path + childSnapshot.name(),
+            "series": series,
+            "value": parseInt(data[_config.value])
+          };
+          break;
+        case "line":
+        case "scatter":
+          series = (_config.series[0] === "$") ? pathDict.params[_config.series] : data[_config.series];
+          var xCoord;
+          if (typeof _config.xCoord.stream !== "undefined" && _config.xCoord.stream) {
+            xCoord = (_d3Grapher.data[series] ? _d3Grapher.data[series].streamCount : 0);
+          }
+          else {
+            xCoord = parseInt(data[_config.xCoord.value]);
+          }
+          newDataPoint = {
+            "series": series,
+            "path": pathDict.path + childSnapshot.name(),
+            "xCoord": xCoord,
+            "yCoord": parseInt(data[_config.yCoord.value])
+          };
+          break;
+      }
 
-  /*if (grapher instanceof D3Graph === false &&
-      grapher instanceof D3Table === false &&
-      grapher instanceof D3Map === false) {
-    throw new Error("FireGrapher: \"grapher\" must be an instance of FireGrapherD3");
-  }*/
-  var _grapher = grapher;
+      _d3Grapher.addDataPoint(newDataPoint);
+    });
+  }
+
+  function _removeSeries(seriesName) {
+    switch (_config.type) {
+      case "bar":
+      case "line":
+      case "scatter":
+        delete _d3Grapher.data[seriesName];
+        // TODO: want to make it so that we can remove the current series and re-use its series color
+        // _d3Grapher.numSeries -= 1; // Doesn't work since only opens up the latest color, not the current series' color
+        break;
+    }
+
+    _d3Grapher.draw();
+  }
+
+  function _listenForRemovedRecords(pathDict) {
+    switch (_config.type) {
+      case "map":
+        _firebaseRef.child(pathDict.path).on("child_removed", function(childSnapshot) {
+          _d3Grapher.data.forEach(function(dataPoint, index) {
+            if (dataPoint.path === (pathDict.path + childSnapshot.name())) {
+              _d3Grapher.data.splice(index, 1);
+            }
+          });
+        });
+        break;
+      case "table":
+        break;
+      case "bar":
+      case "line":
+      case "scatter":
+        _firebaseRef.child(pathDict.path).on("child_removed", function(childSnapshot) {
+          var series = (_config.series[0] === "$") ? pathDict.params[_config.series] : childSnapshot.val()[_config.series];
+          _d3Grapher.data[series].values.forEach(function(dataPoint, index) {
+            if (dataPoint.path === (pathDict.path + childSnapshot.name())) {
+              var spliced = _d3Grapher.data[series].values.splice(index, 1);
+              if (_config.type === "bar") {
+                _d3Grapher.data[series].sum -= spliced;
+              }
+            }
+          });
+        });
+        break;
+    }
+
+    _d3Grapher.draw();
+  }
+
+  function _listenForChangedRecords() {
+    // TODO: implement
+  }
 
   /********************/
   /*  PUBLIC METHODS  */
@@ -405,114 +493,26 @@ var FireGrapherParser = function(firebaseRef, config, grapher) {
     }
   };
 
-  /********************/
-  /*  PRIVATE METHODS */
-  /********************/
-  function _listenForNewRecords(pathDict, eventToListenTo) {
-    _this.pathsToRecords.push(pathDict);
-    _firebaseRef.child(pathDict.path).on(eventToListenTo, function(childSnapshot) {
-      var data = childSnapshot.val();
-      var series;
-
-      var newDataPoint;
-
-      switch (_config.type) {
-        case "map":
-          newDataPoint = {
-            "path": pathDict.path + childSnapshot.name(),
-            "label": data[_config.marker.label],
-            "radius": data[_config.marker.magnitude],
-            "latitude": parseFloat(data[_config.marker.latitude]),
-            "longitude": parseFloat(data[_config.marker.longitude])
-          };
-          break;
-        case "table":
-          newDataPoint = [];
-          _config.columns.forEach(function(column) {
-            newDataPoint.push((typeof data[column.value] !== "undefined") ? data[column.value].toString() : "");
-          });
-          break;
-        case "bar":
-          series = (_config.series[0] === "$") ? pathDict.params[_config.series] : data[_config.series];
-          newDataPoint = {
-            "path": pathDict.path + childSnapshot.name(),
-            "series": series,
-            "value": parseInt(data[_config.value])
-          };
-          break;
-        case "line":
-        case "scatter":
-          series = (_config.series[0] === "$") ? pathDict.params[_config.series] : data[_config.series];
-          var xCoord;
-          if (typeof _config.xCoord.stream !== "undefined" && _config.xCoord.stream) {
-            xCoord = (_grapher.data[series] ? _grapher.data[series].streamCount : 0);
-          }
-          else {
-            xCoord = parseInt(data[_config.xCoord.value]);
-          }
-          newDataPoint = {
-            "series": series,
-            "path": pathDict.path + childSnapshot.name(),
-            "xCoord": xCoord,
-            "yCoord": parseInt(data[_config.yCoord.value])
-          };
-          break;
-      }
-
-      _grapher.addDataPoint(newDataPoint);
-    });
+  /*****************/
+  /*  CONSTRUCTOR  */
+  /*****************/
+  if (firebaseRef instanceof Firebase === false) {
+    throw new Error("firebaseRef must be an instance of Firebase");
+    // TODO: can they pass in a limit query?
   }
+  var _firebaseRef = firebaseRef;
 
-  function _removeSeries(seriesName) {
-    switch (_config.type) {
-      case "bar":
-      case "line":
-      case "scatter":
-        delete _grapher.data[seriesName];
-        // TODO: want to make it so that we can remove the current series and re-use its series color
-        // _grapher.numSeries -= 1; // Doesn't work since only opens up the latest color, not the current series' color
-        break;
-    }
+  var _config = config;
 
-    _grapher.draw();
+  // Parse the path to an individual record
+  var _pathToRecordTokens = _config.path.split("/");
+
+  if (d3Grapher instanceof D3Graph === false &&
+      d3Grapher instanceof D3Table === false &&
+      d3Grapher instanceof D3Map === false) {
+    throw new Error("d3Grapher must be an instance of FireGrapherD3");
   }
-
-  function _listenForRemovedRecords(pathDict) {
-    switch (_config.type) {
-      case "map":
-        _firebaseRef.child(pathDict.path).on("child_removed", function(childSnapshot) {
-          _grapher.data.forEach(function(dataPoint, index) {
-            if (dataPoint.path === (pathDict.path + childSnapshot.name())) {
-              _grapher.data.splice(index, 1);
-            }
-          });
-        });
-        break;
-      case "table":
-        break;
-      case "bar":
-      case "line":
-      case "scatter":
-        _firebaseRef.child(pathDict.path).on("child_removed", function(childSnapshot) {
-          var series = (_config.series[0] === "$") ? pathDict.params[_config.series] : childSnapshot.val()[_config.series];
-          _grapher.data[series].values.forEach(function(dataPoint, index) {
-            if (dataPoint.path === (pathDict.path + childSnapshot.name())) {
-              var spliced = _grapher.data[series].values.splice(index, 1);
-              if (_config.type === "bar") {
-                _grapher.data[series].sum -= spliced;
-              }
-            }
-          });
-        });
-        break;
-    }
-
-    _grapher.draw();
-  }
-
-  function _listenForChangedRecords() {
-    // TODO: implement
-  }
+  var _d3Grapher = d3Grapher;
 };
 /**
  * Creates a D3Graph instance.
@@ -567,29 +567,30 @@ var D3Graph = function(config, cssSelector) {
     // if we need to redraw the scales,
     // that means everything on it, is not to scale
     // so we need to redraw the entire graph
-    d3.select(_cssSelector + " svg").remove();
-    _graph = d3.select(_cssSelector)
-      .append("svg")
-        .attr("class", "fg-" + _config.type)
-        .attr("width", _config.styles.size.width + margin.left + margin.right)
-        .attr("height", _config.styles.size.height + margin.bottom + margin.top)
-        .append("g")
-          .attr("transform", "translate("+margin.left+", "+margin.bottom+")");
+    if (!_graph || d3.selectAll(_cssSelector + " svg").empty()) {
+      _graph = d3.select(_cssSelector)
+        .append("svg")
+          .attr("class", "fg-" + _config.type)
+          .attr("width", _config.styles.size.width)
+          .attr("height", _config.styles.size.height)
+          .append("g")
+            .attr("transform", "translate("+margin.left+", "+margin.bottom+")");
 
-    // append graph title
-    if (_config.title) {
-      _graph.append("text")
-        .attr("class", "fg-title")
-        .attr("x", (width / 2))
-        .attr("y", 0 - (margin.top / 2))
-        .attr("text-anchor", "middle")
-        .style("font-size", "16px")
-        .style("text-decoration", "underline")
-        .text(_config.title);
+      // append graph title
+      if (_config.title) {
+        _graph.append("text")
+          .attr("class", "fg-title")
+          .attr("x", (width / 2))
+          .attr("y", 0 - (margin.top / 2))
+          .attr("text-anchor", "middle")
+          .style("font-size", "16px")
+          .style("text-decoration", "underline")
+          .text(_config.title);
+      }
     }
 
     // set the range based on the calculated width and height
-    _yScale.range([height, 0]);
+    _yScale.range([height-margin.bottom, 0]);
     if (_config.type === "bar") {
       _xScale.rangeRoundBands([0, width], 0.1, 1);
     } else {
@@ -601,7 +602,7 @@ var D3Graph = function(config, cssSelector) {
       .orient("bottom")
       .scale(_xScale)
       .ticks(Math.floor(width * 0.035))
-      .tickSize(-height, -height);
+      .tickSize(-height+margin.bottom, -height+margin.bottom);
 
     var yAxis = d3.svg.axis()
       .orient("left")
@@ -609,26 +610,52 @@ var D3Graph = function(config, cssSelector) {
       .ticks(Math.floor(height * 0.035))
       .tickSize(-width, -width);
 
-    // adding new scales
-    _graph
-      .append("g")
-        .attr("class", "fg-axis fg-x-axis")
-        .attr("transform", "translate(0," + (height) + ")")
-        .attr("shape-rendering", "crispEdges")
-        .call(xAxis)
-        .selectAll("text")
-          .attr("x", 0)
-          .attr("y", 10);
-
-    _graph
-      .append("g")
-        .attr("class", "fg-axis fg-y-axis")
-        .attr("shape-rendering", "crispEdges")
-        .call(yAxis)
-        .selectAll("text")
-          .attr("x", -10)
-          .attr("y", 0);
-
+    // adding new x scale
+    if (_graph.selectAll("g.fg-x-axis").empty()) {
+      _graph
+        .append("g")
+          .attr("class", "fg-axis fg-x-axis")
+          .attr("transform", "translate(0," + (height-margin.bottom) + ")")
+          .attr("shape-rendering", "crispEdges")
+          .call(xAxis);
+      _graph
+        .append("text")
+          .attr("class", "fg-axis-label fg-x-axis-label")
+          .attr("transform", "translate("+width+", "+(height+margin.bottom/2)+")")
+          .attr("fill", _config.styles.axes.x.label.fillColor)
+          .attr("font-size", _config.styles.axes.x.label.fontSize)
+          .attr("font-weight", "bold")
+          .style("text-anchor", "end")
+          .text(_config.xCoord.label);
+    } else {
+      // update axis with new xAxis
+      _graph.selectAll("g.fg-x-axis")
+        .call(xAxis);
+    }
+    
+    // adding new y scale
+    if (_graph.selectAll("g.fg-y-axis").empty()) {
+      _graph
+        .append("g")
+          .attr("class", "fg-axis fg-y-axis")
+          .attr("shape-rendering", "crispEdges")
+          .call(yAxis);
+      _graph
+        .append("text")
+          .attr("class", "fg-axis-label fg-y-axis-label")
+          .attr("transform", "rotate(-90)")
+          .attr("fill", _config.styles.axes.y.label.fillColor)
+          .attr("font-size", _config.styles.axes.y.label.fontSize)
+          .attr("font-weight", "bold")
+          .attr("dy", -margin.left + 16) // -margin.left will put it at 0, need to make room for text so add a bit for text size
+          .style("text-anchor", "end")
+          .text(_config.yCoord.label);
+    } else {
+      // update axis with new yAxis
+      _graph.selectAll("g.fg-y-axis")
+        .call(yAxis);
+    }
+    
     // Style the graph
     _graph.selectAll(".domain")
       .attr("stroke", _config.styles.outerStrokeColor)
@@ -653,32 +680,6 @@ var D3Graph = function(config, cssSelector) {
       .attr("stroke", "none")
       .attr("fill", _config.styles.axes.y.ticks.fillColor)
       .attr("font-size", _config.styles.axes.y.ticks.fontSize);
-
-
-    // TODO: Use custom google font from https://www.google.com/fonts
-    // labels
-    _graph
-      .append("text")
-        .attr("class", "fg-axis-label fg-x-axis-label")
-        .attr("transform", "translate(0, 50)")
-        .attr("fill", _config.styles.axes.x.label.fillColor)
-        .attr("font-size", _config.styles.axes.x.label.fontSize)
-        .attr("font-weight", "bold")
-        .attr("dx", width)
-        .attr("dy", height)
-        .style("text-anchor", "end")
-        .text(_config.xCoord.label);
-
-    _graph
-      .append("text")
-        .attr("class", "fg-axis-label fg-y-axis-label")
-        .attr("transform", "rotate(-90)")
-        .attr("fill", _config.styles.axes.y.label.fillColor)
-        .attr("font-size", _config.styles.axes.y.label.fontSize)
-        .attr("font-weight", "bold")
-        .attr("dy", -margin.left + 16) // -margin.left will put it at 0, need to make room for text so add a bit for text size
-        .style("text-anchor", "end")
-        .text(_config.yCoord.label);
 
     // reload the lines and datapoints
     for (var series in _this.data) {
@@ -884,8 +885,6 @@ var D3Graph = function(config, cssSelector) {
         series.push(k);
       }
     }
-    // remove old legend
-    _graph.selectAll("g.fg-legend").remove();
     // if multiple series, draw new legend
     if (series.length > 1) {
       var margin = { top: 5, bottom: 5, left: 5, right: 5 };
@@ -895,9 +894,11 @@ var D3Graph = function(config, cssSelector) {
       var y = _config.styles.size.height - legendHeight * 2 - margin.top - margin.bottom;
 
       // can't attach text to rect, so make a g with both
-      var gs = _graph
-        .append("g")
+      var gs = _graph.selectAll("g.fg-legend");
+      if (_graph.selectAll("g.fg-legend").empty()) {
+        gs.append("g")
           .attr("class", "fg-legend");
+      }
 
       // append rectangle for shape if necessary, stroke set to none to remove
       gs.append("rect")
@@ -936,7 +937,8 @@ var D3Graph = function(config, cssSelector) {
 
   function _drawLine(seriesIndex, dataPoints) {
     var margin = { top: 20, bottom: 30, left: 60, right: 20 };
-    var height = _config.styles.size.height - margin.bottom - margin.top;
+    // margin.bottom * 2 because we subtract it once in the yAxis transform and once in the range
+    var height = _config.styles.size.height - margin.bottom * 2 - margin.top;
 
     var area = d3.svg.area()
       .defined(function(d) { return d !== null; })
@@ -952,32 +954,49 @@ var D3Graph = function(config, cssSelector) {
       });
 
     // update the graph with the area based on the data
-    _graph
-      .append("path")
-        .datum(dataPoints)
+    var areaObj = _graph
+      .selectAll("path.fg-area-" + seriesIndex)
+        .data([dataPoints]);
+    // this should only enter once (first creation)
+    areaObj
+      .enter().append("path")
         .attr("class", "fg-area fg-area-" + seriesIndex)
         .attr("stroke", _config.styles.series.strokeColors[seriesIndex])  // What if more series than colors?
         .attr("stroke-width", _config.styles.series.strokeWidth)
         .attr("fill", _config.styles.series.strokeColors[seriesIndex])
-        .attr("fill-opacity", 0.5)
-        .attr("d", area);
+        .attr("fill-opacity", 0.5);
+    // this should never exit, but if it does, remove it
+    areaObj
+      .exit().remove();
+    // update the area
+    areaObj
+      .attr("d", area(dataPoints));
   }
 
   function _drawDataPoints(seriesIndex, dataPoints) {
-    _graph.selectAll("circle.fg-series" + seriesIndex)
-      .data(dataPoints).enter()
-      .append("circle")
+    // add/remove data points as necessary
+    var dataPointObjects = _graph
+      .selectAll("circle.fg-series-" + seriesIndex)
+        .data(dataPoints);
+    dataPointObjects
+      .enter()
+        .append("circle")
         .attr("class", "fg-marker fg-series-" + seriesIndex)
         .attr("stroke", _config.styles.markers.strokeColors[seriesIndex]) // What if more series than colors?
         .attr("stroke-width", _config.styles.markers.strokeWidth)
-        .attr("fill", _config.styles.markers.fillColors[seriesIndex])
-        .attr("cx", function(dataPoint) {
-          return _xScale(dataPoint.xCoord);
-        })
-        .attr("cy", function(dataPoint) {
-          return _yScale(dataPoint.yCoord);
-        })
-        .attr("r", _config.styles.markers.size);
+        .attr("fill", _config.styles.markers.fillColors[seriesIndex]);
+    dataPointObjects
+      .exit().remove();
+
+    // update remaining data points x and y
+    dataPointObjects
+      .attr("cx", function(dataPoint) {
+        return _xScale(dataPoint.xCoord);
+      })
+      .attr("cy", function(dataPoint) {
+        return _yScale(dataPoint.yCoord);
+      })
+      .attr("r", _config.styles.markers.size);
   }
 
   function _drawBar(series, barData) {

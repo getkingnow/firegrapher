@@ -51,29 +51,30 @@ var D3Graph = function(config, cssSelector) {
     // if we need to redraw the scales,
     // that means everything on it, is not to scale
     // so we need to redraw the entire graph
-    d3.select(_cssSelector + " svg").remove();
-    _graph = d3.select(_cssSelector)
-      .append("svg")
-        .attr("class", "fg-" + _config.type)
-        .attr("width", _config.styles.size.width + margin.left + margin.right)
-        .attr("height", _config.styles.size.height + margin.bottom + margin.top)
-        .append("g")
-          .attr("transform", "translate("+margin.left+", "+margin.bottom+")");
+    if (!_graph || d3.selectAll(_cssSelector + " svg").empty()) {
+      _graph = d3.select(_cssSelector)
+        .append("svg")
+          .attr("class", "fg-" + _config.type)
+          .attr("width", _config.styles.size.width)
+          .attr("height", _config.styles.size.height)
+          .append("g")
+            .attr("transform", "translate("+margin.left+", "+margin.bottom+")");
 
-    // append graph title
-    if (_config.title) {
-      _graph.append("text")
-        .attr("class", "fg-title")
-        .attr("x", (width / 2))
-        .attr("y", 0 - (margin.top / 2))
-        .attr("text-anchor", "middle")
-        .style("font-size", "16px")
-        .style("text-decoration", "underline")
-        .text(_config.title);
+      // append graph title
+      if (_config.title) {
+        _graph.append("text")
+          .attr("class", "fg-title")
+          .attr("x", (width / 2))
+          .attr("y", 0 - (margin.top / 2))
+          .attr("text-anchor", "middle")
+          .style("font-size", "16px")
+          .style("text-decoration", "underline")
+          .text(_config.title);
+      }
     }
 
     // set the range based on the calculated width and height
-    _yScale.range([height, 0]);
+    _yScale.range([height-margin.bottom, 0]);
     if (_config.type === "bar") {
       _xScale.rangeRoundBands([0, width], 0.1, 1);
     } else {
@@ -85,7 +86,7 @@ var D3Graph = function(config, cssSelector) {
       .orient("bottom")
       .scale(_xScale)
       .ticks(Math.floor(width * 0.035))
-      .tickSize(-height, -height);
+      .tickSize(-height+margin.bottom, -height+margin.bottom);
 
     var yAxis = d3.svg.axis()
       .orient("left")
@@ -93,26 +94,52 @@ var D3Graph = function(config, cssSelector) {
       .ticks(Math.floor(height * 0.035))
       .tickSize(-width, -width);
 
-    // adding new scales
-    _graph
-      .append("g")
-        .attr("class", "fg-axis fg-x-axis")
-        .attr("transform", "translate(0," + (height) + ")")
-        .attr("shape-rendering", "crispEdges")
-        .call(xAxis)
-        .selectAll("text")
-          .attr("x", 0)
-          .attr("y", 10);
-
-    _graph
-      .append("g")
-        .attr("class", "fg-axis fg-y-axis")
-        .attr("shape-rendering", "crispEdges")
-        .call(yAxis)
-        .selectAll("text")
-          .attr("x", -10)
-          .attr("y", 0);
-
+    // adding new x scale
+    if (_graph.selectAll("g.fg-x-axis").empty()) {
+      _graph
+        .append("g")
+          .attr("class", "fg-axis fg-x-axis")
+          .attr("transform", "translate(0," + (height-margin.bottom) + ")")
+          .attr("shape-rendering", "crispEdges")
+          .call(xAxis);
+      _graph
+        .append("text")
+          .attr("class", "fg-axis-label fg-x-axis-label")
+          .attr("transform", "translate("+width+", "+(height+margin.bottom/2)+")")
+          .attr("fill", _config.styles.axes.x.label.fillColor)
+          .attr("font-size", _config.styles.axes.x.label.fontSize)
+          .attr("font-weight", "bold")
+          .style("text-anchor", "end")
+          .text(_config.xCoord.label);
+    } else {
+      // update axis with new xAxis
+      _graph.selectAll("g.fg-x-axis")
+        .call(xAxis);
+    }
+    
+    // adding new y scale
+    if (_graph.selectAll("g.fg-y-axis").empty()) {
+      _graph
+        .append("g")
+          .attr("class", "fg-axis fg-y-axis")
+          .attr("shape-rendering", "crispEdges")
+          .call(yAxis);
+      _graph
+        .append("text")
+          .attr("class", "fg-axis-label fg-y-axis-label")
+          .attr("transform", "rotate(-90)")
+          .attr("fill", _config.styles.axes.y.label.fillColor)
+          .attr("font-size", _config.styles.axes.y.label.fontSize)
+          .attr("font-weight", "bold")
+          .attr("dy", -margin.left + 16) // -margin.left will put it at 0, need to make room for text so add a bit for text size
+          .style("text-anchor", "end")
+          .text(_config.yCoord.label);
+    } else {
+      // update axis with new yAxis
+      _graph.selectAll("g.fg-y-axis")
+        .call(yAxis);
+    }
+    
     // Style the graph
     _graph.selectAll(".domain")
       .attr("stroke", _config.styles.outerStrokeColor)
@@ -137,32 +164,6 @@ var D3Graph = function(config, cssSelector) {
       .attr("stroke", "none")
       .attr("fill", _config.styles.axes.y.ticks.fillColor)
       .attr("font-size", _config.styles.axes.y.ticks.fontSize);
-
-
-    // TODO: Use custom google font from https://www.google.com/fonts
-    // labels
-    _graph
-      .append("text")
-        .attr("class", "fg-axis-label fg-x-axis-label")
-        .attr("transform", "translate(0, 50)")
-        .attr("fill", _config.styles.axes.x.label.fillColor)
-        .attr("font-size", _config.styles.axes.x.label.fontSize)
-        .attr("font-weight", "bold")
-        .attr("dx", width)
-        .attr("dy", height)
-        .style("text-anchor", "end")
-        .text(_config.xCoord.label);
-
-    _graph
-      .append("text")
-        .attr("class", "fg-axis-label fg-y-axis-label")
-        .attr("transform", "rotate(-90)")
-        .attr("fill", _config.styles.axes.y.label.fillColor)
-        .attr("font-size", _config.styles.axes.y.label.fontSize)
-        .attr("font-weight", "bold")
-        .attr("dy", -margin.left + 16) // -margin.left will put it at 0, need to make room for text so add a bit for text size
-        .style("text-anchor", "end")
-        .text(_config.yCoord.label);
 
     // reload the lines and datapoints
     for (var series in _this.data) {
@@ -368,8 +369,6 @@ var D3Graph = function(config, cssSelector) {
         series.push(k);
       }
     }
-    // remove old legend
-    _graph.selectAll("g.fg-legend").remove();
     // if multiple series, draw new legend
     if (series.length > 1) {
       var margin = { top: 5, bottom: 5, left: 5, right: 5 };
@@ -379,9 +378,11 @@ var D3Graph = function(config, cssSelector) {
       var y = _config.styles.size.height - legendHeight * 2 - margin.top - margin.bottom;
 
       // can't attach text to rect, so make a g with both
-      var gs = _graph
-        .append("g")
+      var gs = _graph.selectAll("g.fg-legend");
+      if (_graph.selectAll("g.fg-legend").empty()) {
+        gs.append("g")
           .attr("class", "fg-legend");
+      }
 
       // append rectangle for shape if necessary, stroke set to none to remove
       gs.append("rect")
@@ -420,7 +421,8 @@ var D3Graph = function(config, cssSelector) {
 
   function _drawLine(seriesIndex, dataPoints) {
     var margin = { top: 20, bottom: 30, left: 60, right: 20 };
-    var height = _config.styles.size.height - margin.bottom - margin.top;
+    // margin.bottom * 2 because we subtract it once in the yAxis transform and once in the range
+    var height = _config.styles.size.height - margin.bottom * 2 - margin.top;
 
     var area = d3.svg.area()
       .defined(function(d) { return d !== null; })
@@ -436,32 +438,49 @@ var D3Graph = function(config, cssSelector) {
       });
 
     // update the graph with the area based on the data
-    _graph
-      .append("path")
-        .datum(dataPoints)
+    var areaObj = _graph
+      .selectAll("path.fg-area-" + seriesIndex)
+        .data([dataPoints]);
+    // this should only enter once (first creation)
+    areaObj
+      .enter().append("path")
         .attr("class", "fg-area fg-area-" + seriesIndex)
         .attr("stroke", _config.styles.series.strokeColors[seriesIndex])  // What if more series than colors?
         .attr("stroke-width", _config.styles.series.strokeWidth)
         .attr("fill", _config.styles.series.strokeColors[seriesIndex])
-        .attr("fill-opacity", 0.5)
-        .attr("d", area);
+        .attr("fill-opacity", 0.5);
+    // this should never exit, but if it does, remove it
+    areaObj
+      .exit().remove();
+    // update the area
+    areaObj
+      .attr("d", area(dataPoints));
   }
 
   function _drawDataPoints(seriesIndex, dataPoints) {
-    _graph.selectAll("circle.fg-series" + seriesIndex)
-      .data(dataPoints).enter()
-      .append("circle")
+    // add/remove data points as necessary
+    var dataPointObjects = _graph
+      .selectAll("circle.fg-series-" + seriesIndex)
+        .data(dataPoints);
+    dataPointObjects
+      .enter()
+        .append("circle")
         .attr("class", "fg-marker fg-series-" + seriesIndex)
         .attr("stroke", _config.styles.markers.strokeColors[seriesIndex]) // What if more series than colors?
         .attr("stroke-width", _config.styles.markers.strokeWidth)
-        .attr("fill", _config.styles.markers.fillColors[seriesIndex])
-        .attr("cx", function(dataPoint) {
-          return _xScale(dataPoint.xCoord);
-        })
-        .attr("cy", function(dataPoint) {
-          return _yScale(dataPoint.yCoord);
-        })
-        .attr("r", _config.styles.markers.size);
+        .attr("fill", _config.styles.markers.fillColors[seriesIndex]);
+    dataPointObjects
+      .exit().remove();
+
+    // update remaining data points x and y
+    dataPointObjects
+      .attr("cx", function(dataPoint) {
+        return _xScale(dataPoint.xCoord);
+      })
+      .attr("cy", function(dataPoint) {
+        return _yScale(dataPoint.yCoord);
+      })
+      .attr("r", _config.styles.markers.size);
   }
 
   function _drawBar(series, barData) {
