@@ -91,24 +91,24 @@
   document.getElementById("startJacobcoinButton").addEventListener("click", startJacobcoin);
   document.getElementById("stopJacobcoinButton").addEventListener("click", stopJacobcoin);
 
-  var fireGrapher1 = new FireGrapher(firebaseRef.child("stocks"), "#stockChart1", {
-    type : "line",
-    path: "$symbol/*",
-    title: "Price over Time (Stocks in USD)",
-    xCoord: {
-      "label" : "Time",
-      "value" : "time",
-      "min": 0,
-      "max": 30
-    },
-    yCoord: {
-      "label" : "Price",
-      "value" : "price",
-      "min": 40,
-      "max": 150
-    },
-    series: "$symbol"
-  });
+  // var fireGrapher1 = new FireGrapher(firebaseRef.child("stocks"), "#stockChart1", {
+  //   type : "line",
+  //   path: "$symbol/*",
+  //   title: "Price over Time (Stocks in USD)",
+  //   xCoord: {
+  //     "label" : "Time",
+  //     "value" : "time",
+  //     "min": 0,
+  //     "max": 30
+  //   },
+  //   yCoord: {
+  //     "label" : "Price",
+  //     "value" : "price",
+  //     "min": 40,
+  //     "max": 150
+  //   },
+  //   series: "$symbol"
+  // });
 
   var fireGrapher2 = new FireGrapher(firebaseRef.child("stocks2"), "#stockChart2", {
     type : "scatter",
@@ -130,168 +130,168 @@
     series: "symbol"
   });
 
-  firebaseRef.update({
-    "users": {
-      "0" : {
-        "firstName": "Jacob",
-        "lastName": "Wenger",
-        "email": "jacob@firebase.com",
-        "gender": "Male",
-        "isPaid": false
-      },
-      "1" : {
-        "firstName": "Tony",
-        "lastName": "Meng",
-        "email": "tony@firebase.com",
-        "gender": "Male",
-        "isPaid": true
-      },
-      "2" : {
-        "firstName": "Al",
-        "lastName": "Coholic",
-        "email": "al@firebase.com",
-        "gender": "Male",
-        "isPaid": true
-      },
-      "3" : {
-        "firstName": "Anne",
-        "lastName": "Teak",
-        "email": "anne@firebase.com",
-        "gender": "Female",
-        "isPaid": false
-      },
-      "4" : {
-        "firstName": "Portia",
-        "lastName": "Johns",
-        "email": "portia@firebase.com",
-        "gender": "Female",
-        "isPaid": false
-      },
-      "5" : {
-        "firstName": "Stan",
-        "lastName": "Francisco",
-        "email": "stan@firebase.com",
-        "gender": "Male",
-        "isPaid": true
-      },
-      "6" : {
-        "firstName": "Paulie",
-        "lastName": "Exclusion",
-        "email": "paulie@firebase.com",
-        "gender": "Male",
-        "isPaid": false
-      },
-      "7" : {
-        "firstName": "Jeff",
-        "lastName": "Jefferson",
-        "email": "jeff@firebase.com",
-        "gender": "Male",
-        "isPaid": true
-      },
-      "8" : {
-        "firstName": "Mary",
-        "lastName": "Annette",
-        "email": "mary@firebase.com",
-        "gender": "Female",
-        "isPaid": true
-      },
-      "9" : {
-        "firstName": "Firebase",
-        "lastName": "Williams",
-        "email": "firebase@firebase.com",
-        "gender": "Male",
-        "isPaid": false
-      }
-    }
-  });
+  // firebaseRef.update({
+  //   "users": {
+  //     "0" : {
+  //       "firstName": "Jacob",
+  //       "lastName": "Wenger",
+  //       "email": "jacob@firebase.com",
+  //       "gender": "Male",
+  //       "isPaid": false
+  //     },
+  //     "1" : {
+  //       "firstName": "Tony",
+  //       "lastName": "Meng",
+  //       "email": "tony@firebase.com",
+  //       "gender": "Male",
+  //       "isPaid": true
+  //     },
+  //     "2" : {
+  //       "firstName": "Al",
+  //       "lastName": "Coholic",
+  //       "email": "al@firebase.com",
+  //       "gender": "Male",
+  //       "isPaid": true
+  //     },
+  //     "3" : {
+  //       "firstName": "Anne",
+  //       "lastName": "Teak",
+  //       "email": "anne@firebase.com",
+  //       "gender": "Female",
+  //       "isPaid": false
+  //     },
+  //     "4" : {
+  //       "firstName": "Portia",
+  //       "lastName": "Johns",
+  //       "email": "portia@firebase.com",
+  //       "gender": "Female",
+  //       "isPaid": false
+  //     },
+  //     "5" : {
+  //       "firstName": "Stan",
+  //       "lastName": "Francisco",
+  //       "email": "stan@firebase.com",
+  //       "gender": "Male",
+  //       "isPaid": true
+  //     },
+  //     "6" : {
+  //       "firstName": "Paulie",
+  //       "lastName": "Exclusion",
+  //       "email": "paulie@firebase.com",
+  //       "gender": "Male",
+  //       "isPaid": false
+  //     },
+  //     "7" : {
+  //       "firstName": "Jeff",
+  //       "lastName": "Jefferson",
+  //       "email": "jeff@firebase.com",
+  //       "gender": "Male",
+  //       "isPaid": true
+  //     },
+  //     "8" : {
+  //       "firstName": "Mary",
+  //       "lastName": "Annette",
+  //       "email": "mary@firebase.com",
+  //       "gender": "Female",
+  //       "isPaid": true
+  //     },
+  //     "9" : {
+  //       "firstName": "Firebase",
+  //       "lastName": "Williams",
+  //       "email": "firebase@firebase.com",
+  //       "gender": "Male",
+  //       "isPaid": false
+  //     }
+  //   }
+  // });
 
-  var fireGrapher3 = new FireGrapher(firebaseRef.child("users"), "#userTable", {
-    type : "table",
-    path: "$userId",
-    columns: [
-      { "label": "First Name", "value": "firstName", "width" : "50" },
-      { "label": "Last Name", "value": "lastName", "width" : "50" },
-      { "label": "Email", "value": "email", "width" : "80"  },
-      { "label": "Gender", "value": "gender", "width" : "30" },
-      { "label": "Is Paid?", "value": "isPaid", "width" : "20" }
-    ]
-  });
+  // var fireGrapher3 = new FireGrapher(firebaseRef.child("users"), "#userTable", {
+  //   type : "table",
+  //   path: "$userId",
+  //   columns: [
+  //     { "label": "First Name", "value": "firstName", "width" : "50" },
+  //     { "label": "Last Name", "value": "lastName", "width" : "50" },
+  //     { "label": "Email", "value": "email", "width" : "80"  },
+  //     { "label": "Gender", "value": "gender", "width" : "30" },
+  //     { "label": "Is Paid?", "value": "isPaid", "width" : "20" }
+  //   ]
+  // });
 
 
-  var fireGrapher4 = new FireGrapher(firebaseRef, "#jacobcoinChart", {
-    type : "line",
-    path: "jacobcoin",
-    xCoord: {
-      "label" : "Time",
-      "stream" : true,
-      "limit": 30
-    },
-    yCoord: {
-      "label" : "Price (USD)",
-      "value" : "ask",
-      "min": 40,
-      "max": 60
-    },
-    styles: {
-      "size": {
-        "width": 500,
-        "height": 150
-      },
-      "markers": {
-        "size": 8,
-        "strokeColors": ["red"], // TODO: also allow this to be a dictionary of $currency: color?
-        "strokeWidth": 5,
-        "fillColors": ["blue"]
-      },
-      "series": {
-        "strokeWidth": 4,
-        "strokeColors": ["yellow"],
-        "fillColors": ["green"]
-      }
-    },
-    series: "$currency"
-  });
+  // var fireGrapher4 = new FireGrapher(firebaseRef, "#jacobcoinChart", {
+  //   type : "line",
+  //   path: "jacobcoin",
+  //   xCoord: {
+  //     "label" : "Time",
+  //     "stream" : true,
+  //     "limit": 30
+  //   },
+  //   yCoord: {
+  //     "label" : "Price (USD)",
+  //     "value" : "ask",
+  //     "min": 40,
+  //     "max": 60
+  //   },
+  //   styles: {
+  //     "size": {
+  //       "width": 500,
+  //       "height": 150
+  //     },
+  //     "markers": {
+  //       "size": 8,
+  //       "strokeColors": ["red"], // TODO: also allow this to be a dictionary of $currency: color?
+  //       "strokeWidth": 5,
+  //       "fillColors": ["blue"]
+  //     },
+  //     "series": {
+  //       "strokeWidth": 4,
+  //       "strokeColors": ["yellow"],
+  //       "fillColors": ["green"]
+  //     }
+  //   },
+  //   series: "$currency"
+  // });
 
-  var currencyRef = new Firebase("https://publicdata-cryptocurrency.firebaseio.com/");
-  var fireGrapher5 = new FireGrapher(currencyRef, "#digitalCurrencyChart", {
-    type : "line",
-    path: "bitcoin",
-    xCoord: {
-      "label" : "Time",
-      "stream" : true,
-      "limit": 30
-    },
-    yCoord: {
-      "label" : "Price (USD)",
-      "value" : "ask",
-      "min": 446,
-      "max": 448
-    },
-    styles: {
-      "size": {
-        "width": 500,
-        "height": 300
-      }
-    },
-    series: "$currency"
-  });
+  // var currencyRef = new Firebase("https://publicdata-cryptocurrency.firebaseio.com/");
+  // var fireGrapher5 = new FireGrapher(currencyRef, "#digitalCurrencyChart", {
+  //   type : "line",
+  //   path: "bitcoin",
+  //   xCoord: {
+  //     "label" : "Time",
+  //     "stream" : true,
+  //     "limit": 30
+  //   },
+  //   yCoord: {
+  //     "label" : "Price (USD)",
+  //     "value" : "ask",
+  //     "min": 446,
+  //     "max": 448
+  //   },
+  //   styles: {
+  //     "size": {
+  //       "width": 500,
+  //       "height": 300
+  //     }
+  //   },
+  //   series: "$currency"
+  // });
 
-  var fireGrapher6 = new FireGrapher(firebaseRef.child("stocks"), "#stockChart6", {
-    type : "bar",
-    path: "$symbol/*",
-    xCoord: {
-      "label" : "Symbols"
-    },
-    yCoord: {
-      "label" : "Price (USD)"
-    },
-    styles: {
-      "size": {
-        "width": 500,
-        "height": 150
-      }
-    },
-    value : "price",
-    series: "$symbol"
-  });
+  // var fireGrapher6 = new FireGrapher(firebaseRef.child("stocks"), "#stockChart6", {
+  //   type : "bar",
+  //   path: "$symbol/*",
+  //   xCoord: {
+  //     "label" : "Symbols"
+  //   },
+  //   yCoord: {
+  //     "label" : "Price (USD)"
+  //   },
+  //   styles: {
+  //     "size": {
+  //       "width": 500,
+  //       "height": 150
+  //     }
+  //   },
+  //   value : "price",
+  //   series: "$symbol"
+  // });
 })();
