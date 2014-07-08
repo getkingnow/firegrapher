@@ -269,10 +269,13 @@ var FireGrapherParser = function(firebaseRef, config, grapher) {
   function _removeSeries(seriesName) {
     switch (_config.type) {
       case "bar":
+        if (typeof _grapher.data[seriesName] !== 'undefined') {
+          delete _grapher.data[seriesName].aggregation;
+        }
       case "line":
       case "scatter":
         if (typeof _grapher.data[seriesName] !== 'undefined') {
-          _grapher.data[seriesName].values = [];  
+          delete _grapher.data[seriesName].values;
         }
         // TODO: want to make it so that we can remove the current series and re-use its series color
         // _grapher.numSeries -= 1; // Doesn't work since only opens up the latest color, not the current series' color
@@ -579,8 +582,8 @@ var D3Graph = function(config, cssSelector) {
    */
   this.init = function() {
     this.data = {};
-    _xDomain = { min: Number.MAX_VALUE/2, max: Number.MIN_VALUE/2 };
-    _yDomain = { min: Number.MAX_VALUE/2, max: Number.MIN_VALUE/2 };
+    _xDomain = { min: 0, max: 0 };
+    _yDomain = { min: 0, max: 0 };
     _numSeries = 0;
 
     if (_config.type === "bar") {
@@ -716,10 +719,10 @@ var D3Graph = function(config, cssSelector) {
       .attr("font-size", _config.styles.axes.y.ticks.fontSize);
 
     // reload the lines and datapoints
-    for (var series in _this.data) {
-      if (_this.data.hasOwnProperty(series)) {
-        var seriesIndex = _this.data[series].seriesIndex;
-        var coordinates = _this.data[series].values;
+    for (var seriesName in _this.data) {
+      if (_this.data.hasOwnProperty(seriesName)) {
+        var seriesIndex = _this.data[seriesName].seriesIndex;
+        var coordinates = _this.data[seriesName].values;
 
         // if scales haven't changed, go ahead and add the new data point
         switch (_config.type) {
@@ -733,11 +736,17 @@ var D3Graph = function(config, cssSelector) {
             _drawDataPoints(seriesIndex, coordinates);
             break;
           case "bar":
-            _drawBar(series, _this.data[series]);
+            _drawBar(seriesIndex, seriesName, _this.data[seriesName].aggregation);
             break;
         }
-        if (coordinates.length === 0) {
-          delete _this.data[series];
+        if (typeof coordinates === 'undefined') {
+          // coordinates have been removed, delete the series
+          delete _this.data[seriesName];
+          if (_config.type === 'bar') {
+            // update xDomain to remove empty bar and redraw
+            _xScale.domain(Object.keys(_this.data));
+            _this.draw();
+          }
         }
       }
     }
@@ -823,7 +832,7 @@ var D3Graph = function(config, cssSelector) {
       _this.draw();
     } else {
       // if scales haven't changed, go ahead and add the new data point
-      _drawBar(newDataPoint.series, _this.data[newDataPoint.series]);
+      _drawBar(_numSeries, newDataPoint.series, _this.data[newDataPoint.series].aggregation);
     }
   }
 
@@ -990,25 +999,24 @@ var D3Graph = function(config, cssSelector) {
         return _yScale(value.yCoord);
       });
 
-    if (dataPoints.length !== 0) {
-      // update the graph with the area based on the data
-      var areaObj = _graph
-        .selectAll("path.fg-area-" + seriesIndex)
-          .data([dataPoints]);
-      // this should only enter once (first creation)
-      areaObj
-        .enter().append("path")
-          .attr("class", "fg-area fg-area-" + seriesIndex)
-          .attr("stroke", _config.styles.series.strokeColors[seriesIndex])  // What if more series than colors?
-          .attr("stroke-width", _config.styles.series.strokeWidth)
-          .attr("fill", _config.styles.series.strokeColors[seriesIndex])
-          .attr("fill-opacity", 0.5);
-      // this should never exit, but if it does, remove it
-      areaObj
-        .exit().remove();
-      // update the area
-      areaObj
-        .attr("d", area(dataPoints));
+    if (dataPoints) {
+      // if we have data points, graph it
+      var areaObj = _graph.selectAll("path.fg-area-" + seriesIndex);
+      if (areaObj.empty()) {
+        // if path doesn't exist, create it
+        areaObj = _graph
+          .append("path")
+            .attr("class", "fg-area fg-area-" + seriesIndex)
+            .attr("stroke", _config.styles.series.strokeColors[seriesIndex])  // What if more series than colors?
+            .attr("stroke-width", _config.styles.series.strokeWidth)
+            .attr("fill", _config.styles.series.strokeColors[seriesIndex])
+            .attr("fill-opacity", 0.5);
+      }
+      // update the path with the data points if any
+      if (dataPoints.length > 0) {
+        areaObj
+          .attr("d", area(dataPoints));
+      }
     } else {
       // if there's no data, remove the path element
       _graph
@@ -1019,41 +1027,55 @@ var D3Graph = function(config, cssSelector) {
 
   function _drawDataPoints(seriesIndex, dataPoints) {
     // add/remove data points as necessary
-    var dataPointObjects = _graph
-      .selectAll("circle.fg-series-" + seriesIndex)
-        .data(dataPoints);
-    dataPointObjects
-      .enter()
-        .append("circle")
-        .attr("class", "fg-marker fg-series-" + seriesIndex)
-        .attr("stroke", _config.styles.markers.strokeColors[seriesIndex]) // What if more series than colors?
-        .attr("stroke-width", _config.styles.markers.strokeWidth)
-        .attr("fill", _config.styles.markers.fillColors[seriesIndex]);
-    dataPointObjects
-      .exit().remove();
+    if (dataPoints) {
+      var dataPointObjects = _graph
+        .selectAll("circle.fg-series-" + seriesIndex)
+          .data(dataPoints);
+      dataPointObjects
+        .enter()
+          .append("circle")
+          .attr("class", "fg-marker fg-series-" + seriesIndex)
+          .attr("stroke", _config.styles.markers.strokeColors[seriesIndex]) // What if more series than colors?
+          .attr("stroke-width", _config.styles.markers.strokeWidth)
+          .attr("fill", _config.styles.markers.fillColors[seriesIndex]);
+      dataPointObjects
+        .exit().remove();
 
-    // update remaining data points x and y
-    dataPointObjects
-      .attr("cx", function(dataPoint) {
-        return _xScale(dataPoint.xCoord);
-      })
-      .attr("cy", function(dataPoint) {
-        return _yScale(dataPoint.yCoord);
-      })
-      .attr("r", _config.styles.markers.size);
+      // update remaining data points x and y
+      dataPointObjects
+        .attr("cx", function(dataPoint) {
+          return _xScale(dataPoint.xCoord);
+        })
+        .attr("cy", function(dataPoint) {
+          return _yScale(dataPoint.yCoord);
+        })
+        .attr("r", _config.styles.markers.size);
+    } else {
+      _graph.selectAll("circle.fg-series-" + seriesIndex).remove();
+    }
   }
 
-  function _drawBar(series, barData) {
-    var seriesIndex = barData.seriesIndex;
-    _graph.selectAll(".fg-bar .fg-series"+seriesIndex)
-      .data([barData]).enter()
-      .append("rect")
-        .attr("class", "fg-series fg-series-" + seriesIndex)
-        .attr("value", function(d) { return d.aggregation; })
-        .attr("x", function() { return _xScale(series); })
-        .attr("width", _xScale.rangeBand())
-        .attr("y", function(d) { return _yScale(d.aggregation); })
-        .attr("height", function(d) { return _yScale.range()[0] - _yScale(d.aggregation); });
+  function _drawBar(seriesIndex, seriesName, value) {
+    if (typeof value !== 'undefined') {
+      if (_graph.selectAll(".fg-bar .fg-series-" + seriesIndex).empty()) {
+        // bar doesn't exist for series, add it
+        _graph
+          .append("rect")
+            .attr("class", "fg-bar fg-series-" + seriesIndex);
+      } else {
+        // bar exists, update values
+        _graph
+          .select(".fg-bar .fg-series-" + seriesIndex)
+            .datum(value)
+            .attr("x", function() { return _xScale(seriesName); })
+            .attr("width", _xScale.rangeBand())
+            .attr("y", function(d) { return _yScale(d); })
+            .attr("height", function(d) { return _yScale.range()[0] - _yScale(d); });
+      }
+    } else {
+      // no data, no bar
+      _graph.selectAll(".fg-bar .fg-series-" + seriesIndex).remove();
+    }
   }
 };
 
