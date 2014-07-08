@@ -419,31 +419,32 @@ var D3Graph = function(config, cssSelector) {
   }
 
   function _drawLine(seriesIndex, dataPoints) {
-    var line = d3.svg.line()
+    var margin = { top: 20, bottom: 30, left: 60, right: 20 };
+    var height = _config.styles.size.height - margin.bottom - margin.top;
+
+    var area = d3.svg.area()
       .defined(function(d) { return d !== null; })
       .x(function(value) {
         return _xScale(value.xCoord);
       })
-      .y(function(value) {
+      // we want to fill from the bottom of the line to the bottom of the graph
+      // y0 is the added height for the difference between the line and the graph bottoms
+      .y0(height)
+      // y1 is the added height between the top of the line and the bottom of the line
+      .y1(function(value) {
         return _yScale(value.yCoord);
-      })
-      .interpolate("linear");
+      });
 
-    // if line does not already exist, add a new one
-    if (_graph.selectAll("path.fg-series-" + seriesIndex)[0].length === 0) {
-      _graph
-        .append("path")
-          .attr("class", "fg-series fg-series-" + seriesIndex);
-    }
-
-    // update the line with the data
-    _graph.select("path.fg-series-" + seriesIndex)
-      .data([dataPoints])
-      .attr("class", "fg-series fg-series-" + seriesIndex)
-      .attr("stroke", _config.styles.series.strokeColors[seriesIndex])  // What if more series than colors?
-      .attr("stroke-width", _config.styles.series.strokeWidth)
-      .attr("fill", _config.styles.series.fillColors[seriesIndex])
-      .attr("d", line(dataPoints));
+    // update the graph with the area based on the data
+    _graph
+      .append("path")
+        .datum(dataPoints)
+        .attr("class", "fg-area fg-area-" + seriesIndex)
+        .attr("stroke", _config.styles.series.strokeColors[seriesIndex])  // What if more series than colors?
+        .attr("stroke-width", _config.styles.series.strokeWidth)
+        .attr("fill", _config.styles.series.strokeColors[seriesIndex])
+        .attr("fill-opacity", 0.5)
+        .attr("d", area);
   }
 
   function _drawDataPoints(seriesIndex, dataPoints) {

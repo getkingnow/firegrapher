@@ -222,8 +222,7 @@ var FireGrapher = function(firebaseRef, cssSelector, config) {
         },
         "series": {
           "strokeWidth": 2,
-          "strokeColors": defaultStrokeColors,
-          "fillColors": ["none", "none", "none", "none", "none", "none", "none", "none", "none", "none", "none"]
+          "strokeColors": defaultStrokeColors
         },
         "markers": {
           "size": 3.5,
