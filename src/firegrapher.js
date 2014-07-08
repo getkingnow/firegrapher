@@ -115,8 +115,7 @@ var FireGrapher = function() {
         },
         "series": {
           "strokeWidth": 2,
-          "strokeColors": defaultStrokeColors,
-          "fillColors": ["none", "none", "none", "none", "none", "none", "none", "none", "none", "none", "none"]
+          "strokeColors": defaultStrokeColors
         },
         "markers": {
           "size": 3.5,

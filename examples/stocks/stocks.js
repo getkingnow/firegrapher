@@ -67,10 +67,11 @@
         addStockPrice("stocks2", "GOOG", i, getRandomValue(0, 100), false);
       }
     });
-  };
+  }; 
 
+  var jacobCoinInterval;
   function startJacobcoin() {
-    window.setInterval(function() {
+    jacobCoinInterval = window.setInterval(function() {
       var price = getRandomValue(40, 70);
       firebaseRef.child("jacobcoin").set({
         "bid": price,
@@ -79,11 +80,16 @@
     }, 500);
   };
 
+  function stopJacobcoin() {
+    window.clearInterval(jacobCoinInterval);
+  }
+
   document.getElementById("resetFirebaseButton").addEventListener("click", resetFirebase);
   document.getElementById("addYahooStocksButton").addEventListener("click", addYahooStocks);
   document.getElementById("removeGoogleStocksButton").addEventListener("click", removeGoogleStocks);
   document.getElementById("removeStocksButton").addEventListener("click", function() { removeStocks(10) });
   document.getElementById("startJacobcoinButton").addEventListener("click", startJacobcoin);
+  document.getElementById("stopJacobcoinButton").addEventListener("click", stopJacobcoin);
 
   var fireGrapher1 = new FireGrapher();
   fireGrapher1.graph("#stockChart1", firebaseRef.child("stocks"), {
