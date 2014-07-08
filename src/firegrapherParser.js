@@ -11,21 +11,23 @@ var FireGrapherParser = function(firebaseRef, config, grapher) {
   /*****************/
   /*  CONSTRUCTOR  */
   /*****************/
+  // Validate the inputs
+  _validateFirebaseRef(firebaseRef);
+  _validateConfig(config);
+  _validateGrapher(grapher);
+
+  // Store the input parameters in private variables for later use
   var _firebaseRef = firebaseRef;
   var _config = config;
+  var _grapher = grapher;
+
+  // Store the this object in a private variable so private methods can access it
   var _this = this;
 
   this.pathsToRecords = [];
 
   // Parse the path to an individual record
   var _pathToRecordTokens = _config.path.split("/");
-
-  /*if (grapher instanceof D3Graph === false &&
-      grapher instanceof D3Table === false &&
-      grapher instanceof D3Map === false) {
-    throw new Error("FireGrapher: \"grapher\" must be an instance of FireGrapherD3");
-  }*/
-  var _grapher = grapher;
 
   /********************/
   /*  PUBLIC METHODS  */

@@ -3,7 +3,7 @@ module.exports = function(config) {
   config.set({
     frameworks: ["jasmine"],
     preprocessors: {
-      "../src/*.js": "coverage"
+      "../src/**/*.js": "coverage"
     },
     reporters: ["dots", "coverage"],
     coverageReporter: {

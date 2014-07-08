@@ -2,15 +2,29 @@
 /*  GLOBALS  */
 /*************/
 // Override the default timeout interval for Jasmine
-jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000;
 
 // Get a reference to a random demo Firebase
 var demoFirebaseUrl = "https://" + generateRandomString() + ".firebaseio-demo.com";
 
 // Define examples of valid and invalid parameters
-var invalidFirebaseRefs = [null, undefined, true, false, [], {}, 0, 5, "", "a", {a:1}, ["hi", 1]];
+var invalidFirebaseRefs = [null, undefined, true, false, [], {}, function() {}, 0, 5, "", "a", {a:1}, ["hi", 1]];
 var validCssSelectors = ["#graph1", "#graph2", "#graph3"];
-var invalidCssSelectors = [".graph", "div", "#graph0", null, undefined, true, false, [], {}, 0, 5, "", "a"];
+var invalidCssSelectors = [".graph", "div", "#graph0", null, undefined, true, false, [], {}, function() {}, 0, 5, "", "a"];
+var invalidGraphers = [null, undefined, true, false, [], {}, function() {}, 0, 5, "", "a",
+  {
+    init: function() {},
+    draw: function() {}
+  },
+  {
+    init: function() {},
+    addDataPoint: function() {}
+  },
+  {
+    draw: function() {},
+    addDataPoint: function() {}
+  }
+];
 var validConfig = {
   type : "line",
   path: "*",
@@ -22,6 +36,14 @@ var validConfig = {
   },
   series: "symbol"
 };
+
+// Stub out the grapher class
+var D3Graph = function() {
+  this.init = function() {};
+  this.draw = function() {};
+  this.addDataPoint = function() {};
+};
+var grapherStub = new D3Graph();
 
 /**********************/
 /*  HELPER FUNCTIONS  */

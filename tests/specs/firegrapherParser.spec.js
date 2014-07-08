@@ -1,11 +1,4 @@
 describe("FireGrapherParser Tests:", function() {
-  // Stub out the grapher class
-  var grapherStub = {
-    init: function() {},
-    draw: function() {},
-    addDataPoint: function() {},
-  }
-
   beforeEach(function(done) {
     beforeEachHelper(done);
   });
@@ -15,7 +8,29 @@ describe("FireGrapherParser Tests:", function() {
   });
 
   describe("Constructor:", function() {
-    it("Constructor returns the correct paths to records", function(done) {
+    it("Constructor throws errors given invalid Firebase refs", function() {
+      invalidFirebaseRefs.forEach(function(invalidFirebaseRef) {
+        expect(function() { new FireGrapherParser(invalidFirebaseRef, validConfig, grapherStub); }).toThrow();
+      });
+    });
+
+    xit("Constructor throws errors given invalid config objects", function() {
+      expect(true).toBeFalsy();
+    });
+
+    it("Constructor throws errors given invalid graphers", function() {
+      invalidGraphers.forEach(function(invalidGrapher) {
+        expect(function() { new FireGrapherParser(firebaseRef, validConfig, invalidGrapher); }).toThrow();
+      });
+    });
+
+    it("Constructor does not throw errors given valid inputs", function() {
+      expect(function() { new FireGrapherParser(firebaseRef, validConfig, grapherStub); }).not.toThrow();
+    });
+  });
+
+  describe("parsePath():", function() {
+    it("parsePath() returns the correct paths to records", function(done) {
       var config = {
         type : "line",
         path: "*",
@@ -44,7 +59,7 @@ describe("FireGrapherParser Tests:", function() {
       expect(true).toBeTruthy();
     });
 
-    it("Constructor returns the correct paths to records when using wildcard in path and series", function(done) {
+    it("parsePath() returns the correct paths to records when using wildcard in path and series", function(done) {
       var config = {
         type : "line",
         path: "$series/*",
@@ -75,12 +90,12 @@ describe("FireGrapherParser Tests:", function() {
             { path: "/c/", params: { $series : "c" } }
           ]);
           done();
-        }, 50);
+        }, 500);
       });
       expect(true).toBeTruthy();
     });
 
-    it("Constructor returns the correct paths to records when not using *", function(done) {
+    it("parsePath() returns the correct paths to records when not using *", function(done) {
       var config = {
         type : "line",
         path: "jacobcoin",
@@ -107,7 +122,7 @@ describe("FireGrapherParser Tests:", function() {
             { path: "/jacobcoin/", params: {} }
           ]);
           done();
-        }, 50);
+        }, 500);
       });
       expect(true).toBeTruthy();
     });
