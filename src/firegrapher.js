@@ -123,6 +123,13 @@ var FireGrapher = function() {
           "style": "default",
           "strokeColors": defaultStrokeColors,
           "fillColors": defaultFillColors // What about if style is set to "flat"?
+        },
+        "legend": {
+          "fontSize": "16px",
+          "stroke": "#000000",
+          "strokeWidth": "2px",
+          "fill": "#AAAAAA",
+          "fillOpacity": 0.7
         }
       },
       "xCoord": {
