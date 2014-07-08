@@ -1,4 +1,4 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html>
   <head>
     <title>FireGrapher</title>
@@ -13,10 +13,10 @@
     <script src="../../bower_components/d3/d3.js"></script>
 
     <!-- Custom JS -->
-    <script src="stocks.js" defer></script>
+    <script src="demo.js" defer></script>
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" type="text/css" href="stocks.css">
+    <link rel="stylesheet" type="text/css" href="demo.css">
 
     <script type="text/javascript">
       WebFontConfig = {
@@ -32,23 +32,67 @@
         s.parentNode.insertBefore(wf, s);
       })();
     </script>
+
+    <!-- Custom CSS references -->
+    <link type="text/css" rel="stylesheet" href="./css/default.css" />
   </head>
 
   <body>
-    <input id="resetFirebaseButton" type="button" value="Reset Firebase" />
-    <input id="addYahooStocksButton" type="button" value="Add YHOO" />
-    <input id="removeGoogleStocksButton" type="button" value="Remove GOOG" />
-    <input id="removeStocksButton" type="button" value="Remove last 10 stocks from from graph 2" />
-    <input id="startJacobcoinButton" type="button" value="Start Jacobcoin" />
-    <input id="stopJacobcoinButton" type="button" value="Stop Jacobcoin" />
+    <img id="scrollButton" src="./images/scrollButton.png" />
 
-    <div id="graphs">
-      <div id="stockChart1"></div>
-      <div id="stockChart2"></div>
-      <div id="userTable"></div>
-      <div id="jacobcoinChart"></div>
-      <div id="digitalCurrencyChart"></div>
-      <div id="stockChart6"></div>
+    <div id="mainSection">
+      <div id="header">
+        <a id="logo" href="./">FireGrapher</a>
+        <div id="headerLinks">
+          <a id="downloadLink" href="//apps.microsoft.com/windows/app/rustic-citrus/c7f73eae-9de1-48ef-a99d-6a61105d8349">DOWNLOAD</a>
+        </div>
+        <div class="clear"></div>
+      </div>
+      <img id="mainMenuScreenshot" src="./resources/images/screenshots/mainMenuScreenshot.png" alt="Main menu screenshot" />
+    </div>
+
+    <div id="gameBoardSection" class="fadeInSection">
+      <img src="./resources/images/screenshots/gameBoardScreenshot_straight.png" alt="Game board screenshot" />
+      <p>Use the given letters to find as many words as possible. Find a word which uses every letter to move on to the next round.</p>
+    </div>
+
+    <div id="savedGamesSection" class="fadeInSection">
+      <img src="./resources/images/screenshots/savedGamesScreenshot_straight.png" alt="Saved games screenshot" />
+      <p>Select from three levels of difficulty. Save games at any point and continue them whenever you want.</p>
+    </div>
+
+    <div id="highScoresSection" class="fadeInSection">
+      <img src="./resources/images/screenshots/highScoresScreenshot_straight.png" alt="High scores screenshot" />
+      <p>View local high scores to keep track of your best games for each level of difficulty.</p>
+    </div>
+
+    <div id="recapSection">
+      <div>
+        <img id="rusticCitrusColorLogo" src="./resources/images/rusticCitrusMainColorLogo.png" alt="Rustic Citrus color logo"  />
+        <a href="//apps.microsoft.com/windows/app/rustic-citrus/c7f73eae-9de1-48ef-a99d-6a61105d8349"><img id="windowsStoreBadge" src="./resources/images/windowsStoreBadge.png" alt="Windows Store badge" /></a>
+        <a href="./app/"><img id="playOnlineBadge" src="./resources/images/playOnlineBadge.png" alt="Play online badge" /></a>
+      </div>
+    </div>
+
+    <div id="emailFormSection">
+      <div id="emailForm">
+        <p id="emailFormMessage">Coming soon to iOS and Android!</p>
+        <input id="emailInput" type="email" placeholder="Email me when it's available" />
+        <p id="invalidEmailWarning">* Email invalid</p>
+        <p id="emailPolicy">Note: We will not share your email with advertisers (or the NSA)</p>
+        <p id="emailFormSubmitButton">SUBMIT</p>
+      </div>
+      <div id="emailFormSuccessMessage">
+        <p>Thank you!</p>
+        <p>You will be hearing from us soon!</p>
+      </div>
+    </div>
+
+    <div id="copyrightSection">
+      <div>
+        <p>Copyright &copy; 2013 by</p>
+        <img id="floatingHouseStudiosLogo" src="./resources/images/floatingHouseStudiosLogo.png" alt="Floating House Studios logo" />
+      </div>
     </div>
   </body>
 </html>

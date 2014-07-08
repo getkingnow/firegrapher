@@ -1,7 +1,465 @@
-#lineGraph {
-  width: 500px;
-  height: 300px;
-  border: solid 1px black;
+/**********************/
+/*  GLOBAL VARIABLES  */
+/**********************/
+$primaryColor1: #1ABC9C;
+$primaryColor2: #E74C3C;
+$primaryColor3: #9B59B6;
+
+
+/******************/
+/*  CUSTOM FONTS  */
+/******************/
+@font-face {
+  font-family: "GeoSansLight";
+  src: url("../resources/fonts/GeoSansLight.ttf");
+}
+
+
+/***************/
+/*  NORMALIZE  */
+/***************/
+* {
+  margin: 0px;
+  padding: 0px;
+  -ms-touch-action: auto;
+}
+
+img {
+  text-decoration: none;
+  border: 0;
+}
+
+/* Set html and body height to 100% to get sections to size properly */
+html, body {
+  height: 100%;
+}
+
+@viewport {
+  width: device-width;
+}
+
+@-ms-viewport {
+  width: device-width;
+}
+
+
+/**************/
+/*  SECTIONS  */
+/**************/
+#mainSection, #gameBoardSection, #savedGamesSection, #highScoresSection, #recapSection {
+  position: relative;
+  height: 100%;
+  min-height: 800px;
+}
+
+#emailFormSection {
+  position: relative;
+  height: 500px;
+  min-height: 500px;
+}
+
+#copyrightSection {
+  position: relative;
+  height: 200px;
+  min-height: 200px;
+}
+
+#mainSection, #savedGamesSection, #copyrightSection  {
+  background-color: $primaryColor2;
+}
+
+#gameBoardSection, #highScoresSection, #emailFormSection {
+  background-color: $primaryColor1;
+}
+
+#recapSection {
+  background-image: url("../resources/images/woodBackground.png");
+}
+
+%sectionScreenshot {
+  position: absolute;
   display: block;
+  top: 50%;
+  width: 724px;
+  margin: 0;
+}
+
+%sectionScreenshotCenter {
+  @extend %sectionScreenshot;
+  left: 50%;
+  margin: -250px 0 0 -362px;
+}
+
+%sectionScreenshotLeft {
+  @extend %sectionScreenshot;
+  left: 50%;
+  margin-left: -600px;
+}
+
+%sectionScreenshotRight {
+  @extend %sectionScreenshot;
+  right: 50%;
+  margin-right: -600px;
+}
+
+%sectionDescription {
+  position: absolute;
+  display: block;
+  width: 400px;
+  top: 50%;
+  color: #FFFFFF;
+  font-size: 36px;
+  font-family: "GeoSansLight";
+  text-align: justify;
+}
+
+%sectionDescriptionLeft {
+  @extend %sectionDescription;
+  right: 50%;
+  height: 500px;
+  top: 50%;
+  margin: -125px 200px 0 0;
+}
+
+%sectionDescriptionRight {
+  @extend %sectionDescription;
+  left: 50%;
+  height: 500px;
+  top: 50%;
+  margin: -125px 0 0 200px;
+}
+
+/*******************/
+/*  SCROLL BUTTON  */
+/*******************/
+#scrollButton {
+  position: fixed;
+  right: 50px;
+  bottom: 50px;
+  width: 52px;
+  height: 52px;
+  cursor: pointer;
+  z-index: 5;
+  opacity: 0.8;
+
+  &:hover {
+    opacity: 1.0;
+  }
+}
+
+/******************/
+/*  MAIN SECTION  */
+/******************/
+#logo {
+  float: left;
+  margin: 40px 0 0 30px;
+  font-size: 60px;
+  text-decoration: none;
+  color: #FFF;
   font-family: 'Roboto Slab', serif;
+}
+
+#headerLinks {
+  float: right;
+  margin: 50px 50px 0 0;
+  text-align: center;
+}
+
+%headerLink {
+  float: right;
+  padding: 10px 20px 10px 20px;
+  color: #FFFFFF;
+  font-family: "GeoSansLight";
+  font-size: 26px;
+  font-weight: 700;
+  cursor: pointer;
+  opacity: 0.9;
+  text-decoration: none;
+  display: inline-block;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+#playOnlineLink, #contactLink {
+  @extend %headerLink;
+  padding: 0;
+  margin: 10px 40px 0 0;
+}
+
+#downloadLink {
+  @extend %headerLink;
+  border: solid 2px #FFFFFF;
+  border-radius: 5px;
+
+  &:hover {
+    background: $primaryColor1;
+    border-width: 0;
+    padding: 12px 22px 12px 22px;
+    opacity: 0.8;
+  }
+
+  &:active {
+    opacity: 1.0;
+  }
+}
+
+.clear {
+  float: none;
+  clear: both;
+}
+
+#mainMenuScreenshot {
+  @extend %sectionScreenshotCenter;
+  display: none;
+}
+
+
+/************************/
+/*  GAME BOARD SECTION  */
+/************************/
+#gameBoardSection {
+  img {
+    @extend %sectionScreenshotLeft;
+    opacity: 0;
+    margin-top: -211px;
+  }
+
+  p {
+    @extend %sectionDescriptionRight;
+    height: 220px;
+    margin-top: -110px;
+    opacity: 0;
+  }
+}
+
+
+/*************************/
+/*  SAVED GAMES SECTION  */
+/*************************/
+#savedGamesSection {
+  img {
+    @extend %sectionScreenshotRight;
+    opacity: 0;
+    margin-top: -266px;
+  }
+
+  p {
+    @extend %sectionDescriptionLeft;
+    height: 180px;
+    margin-top: -90px;
+    opacity: 0;
+  }
+}
+
+
+/*************************/
+/*  HIGH SCORES SECTION  */
+/*************************/
+#highScoresSection {
+  img {
+    @extend %sectionScreenshotLeft;
+    opacity: 0;
+    margin-top: -228px;
+  }
+
+  p {
+    @extend %sectionDescriptionRight;
+    height: 180px;
+    margin-top: -90px;
+    opacity: 0;
+  }
+}
+
+
+/*******************/
+/*  RECAP SECTION  */
+/*******************/
+#recapSection {
+  div {
+    position: absolute;
+    display: block;
+    top: 50%;
+    margin-top: -300px;
+    left: 50%;
+    margin-left: -230px;
+    width: 460px;
+    height: 600px;
+  }
+
+  #rusticCitrusColorLogo {
+    display: block;
+    margin: 0 auto 0 auto;
+    width: 460px;
+  }
+
+  #windowsStoreBadge {
+    @extend %badge;
+  }
+
+  #playOnlineBadge {
+    @extend %badge;
+  }
+}
+
+%badge {
+  display: block;
+  width: 460px;
+  margin: 32px auto 0 auto;
+  opacity: 0.8;
+
+  &:hover {
+    opacity: 0.9;
+  }
+
+  &:active {
+    opacity: 1.0;
+  }
+}
+
+/************************/
+/*  EMAIL FORM SECTION  */
+/************************/
+#emailForm {
+  position: absolute;
+  width: 500px;
+  height: 260px;
+  top: 50%;
+  left: 50%;
+  margin: -130px 0 0 -250px;
+}
+
+#emailFormSuccessMessage {
+  position: absolute;
+  width: 500px;
+  height: 90px;
+  top: 50%;
+  left: 50%;
+  margin: -45px 0 0 -250px;
+  color: #FFF;
+  font-size: 36px;
+  font-family: "GeoSansLight";
+  text-align: center;
+  display: none;
+}
+
+#emailFormMessage {
+  color: #FFF;
+  font-family: "GeoSansLight";
+  font-size: 36px;
+  text-align: center;
+}
+
+#invalidEmailWarning {
+  display: none;
+  color: #FFF;
+  font-family: "Verdana";
+  font-size: 14px;
+  margin-top: 7px;
+}
+
+#emailPolicy {
+  color: #FFF;
+  font-family: "Verdana";
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+#emailForm input {
+  display: block;
+  line-height: 1.5;
+  line-height: 1.0\0; /* IE hack */
+  font-family: "Verdana";
+  font-size: 1.4em;
+  margin: 30px 0 0 0;
+  padding: 10px 10px 10px 10px;
+  color: $primaryColor2;
+  width: 475px;
+  border: 3px solid #FFF;
+  background: transparent;
+
+  &:focus {
+    outline: none;
+  }
+}
+
+#emailForm #emailFormSubmitButton {
+  display: block;
+  background: transparent;
+  color: #fff;
+  width: 70px;
+  cursor: pointer;
+  padding: 15px 30px 15px 30px;
+  margin: 40px auto 0 auto;
+  font-family: "Verdana";
+  font-size: 1.1em;
+  border-radius: 5px;
+  border: solid 2px #FFFFFF;
+  text-align: center;
+
+  &:hover {
+    border-width: 0px;
+    padding: 17px 32px 17px 32px;
+    background: $primaryColor1;
+    opacity: 0.9;
+  }
+
+  &:active {
+    opacity: 1;
+  }
+}
+
+::-webkit-input-placeholder { /* WebKit browsers */
+  color: #FFFFFF;
+  font-style: italic;
+}
+
+:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+  color: #FFFFFF;
+  font-style: italic;
+}
+
+::-moz-placeholder { /* Mozilla Firefox 19+ */
+  color: #FFFFFF;
+  font-style: italic;
+}
+
+:-ms-input-placeholder { /* Internet Explorer 10+ */
+  color: #FFFFFF;
+  font-style: italic;
+}
+
+/***********************/
+/*  COPYRIGHT SECTION  */
+/***********************/
+#copyrightSection {
+  div {
+    position: absolute;
+    display: block;
+    top: 50%;
+    left: 50%;
+    width: 334px;
+    height: 150px;
+    margin: -75px 0 0 -167px;
+  }
+
+  p {
+    position: relative;
+    float: left;
+    line-height: 20px;
+    top: 50%;
+    margin: -10px 10px 0 0;
+    color: #FFF;
+    font-family: "Verdana";
+    font-size: 15px;
+  }
+
+  #floatingHouseStudiosLogo {
+    position: relative;
+    float: right;
+    height: 100px;
+    top: 50%;
+    margin: -50px 0 0 0;
+  }
 }
