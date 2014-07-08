@@ -954,36 +954,35 @@ var D3Graph = function(config, cssSelector) {
       }
     }
     // if multiple series, draw new legend
+    _graph.selectAll("g.fg-legend").remove();
     if (series.length > 1) {
       var margin = { top: 5, bottom: 5, left: 5, right: 5 };
+      var padding = { right: 5, bottom: 15 };
       var legendWidth = 50;
       var legendHeight = series.length * 20;
-      var x = _config.styles.size.width - legendWidth * 2 - margin.left - margin.right;
-      var y = _config.styles.size.height - legendHeight * 2 - margin.top - margin.bottom;
+      var x = _config.styles.size.width - (legendWidth + margin.left + margin.right) * 2 - padding.right;
+      var y = _config.styles.size.height - (legendHeight + margin.top + margin.bottom) * 2 - padding.bottom;
 
       // can't attach text to rect, so make a g with both
-      var gs = _graph.selectAll("g.fg-legend");
-      if (_graph.selectAll("g.fg-legend").empty()) {
-        gs.append("g")
-          .attr("class", "fg-legend");
-      }
-
-      // append rectangle for shape if necessary, stroke set to none to remove
-      gs.append("rect")
-        .attr("class", "fg-legend-container")
-        .attr("x", x)
-        .attr("y", y)
-        .attr("width", legendWidth + margin.left + margin.right)
-        .attr("height", legendHeight + margin.top + margin.bottom)
-        .style("stroke", _config.styles.legend.stroke)
-        .style("stroke-width", _config.styles.legend.strokeWidth)
-        .style("fill", _config.styles.legend.fill)
-        .style("fill-opacity", _config.styles.legend.fillOpacity);
+      var gs = _graph.append("g")
+        .attr("class", "fg-legend");
+      gs
+        .append("rect") // append rectangle for shape if necessary, stroke set to none to remove
+          .attr("class", "fg-legend-container")
+          .attr("x", x)
+          .attr("y", y)
+          .attr("width", legendWidth + margin.left + margin.right)
+          .attr("height", legendHeight + margin.top + margin.bottom)
+          .style("stroke", _config.styles.legend.stroke)
+          .style("stroke-width", _config.styles.legend.strokeWidth)
+          .style("fill", _config.styles.legend.fill)
+          .style("fill-opacity", _config.styles.legend.fillOpacity);
 
       // append the series name and appropriate stroke color
-      gs.selectAll("text")
-        .data(series).enter()
-        .append("text")
+      var texts = gs.selectAll("text")
+        .data(series);
+      texts
+        .enter().append("text")
           .attr("class", function(d, i) {
             return "fg-legend-series fg-series-" + i;
           })
