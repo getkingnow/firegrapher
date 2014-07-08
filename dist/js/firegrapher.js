@@ -13,33 +13,136 @@ if (typeof module !== "undefined" && typeof process !== "undefined") {
 var FireGrapher = (function() {
   "use strict";
 /**
- * Creates a FireGrapher instance.
- *
- * @constructor
- * @this {FireGrapher}
- */
-var FireGrapher = function() {
+   * Creates a d3 graph of the data at firebaseRef according to the config options
+   * and places it in the element specified by the inputted CSS selector.
+   *
+   * param {Firebase} firebaseRef A Firebase reference to the data that will be graphed.
+   * param {string} cssSelector A unique CSS selector whose corresponding element will hold the graph.
+   * param {object} config A collection of graph configuration options.
+   */
+var FireGrapher = function(firebaseRef, cssSelector, config) {
+  /*****************/
+  /*  CONSTRUCTOR  */
+  /*****************/
+  // Validate the inputs
+  _validateFirebaseRef(firebaseRef);
+  _validateCssSelector(cssSelector);
+  _validateConfig(config);
+
+  // Recursively loop through the global config object and set any unspecified options
+  // to their default values
+  _recursivelySetDefaults(config, _getDefaultConfig());
+  var el = document.querySelector(cssSelector);
+  config.styles.size = {
+    width: el.clientWidth,
+    height: el.clientHeight
+  };
+
+  var d3Grapher;
+  switch(config.type) {
+    case "line":
+    case "scatter":
+    case "bar":
+      d3Grapher = new D3Graph(config, cssSelector);
+      break;
+    case "map":
+      d3Grapher = new D3Map(config, cssSelector);
+      break;
+    case "table":
+      d3Grapher = new D3Table(config, cssSelector);
+      break;
+    default:
+      throw new Error("Invalid config type: " + config.type);
+  }
+
+  // Initialize the graph
+  d3Grapher.init();
+
+  var parser = new FireGrapherParser(firebaseRef, config, d3Grapher);
+
+  var initialPathsToRecods = [{
+    "path": "/",
+    "params": {}
+  }];
+  parser.parsePath(initialPathsToRecods, 0);
+  //_parsePath(pathDicts, 0);
+
   /********************/
   /*  PRIVATE METHODS */
   /********************/
   /**
+   * Validates the inputted Firebase reference.
+   *
+   * @param {Firebase} firebaseRef The Firebase reference to validate.
+   */
+  function _validateFirebaseRef(firebaseRef) {
+    var error;
+    if (typeof firebaseRef === "undefined") {
+      error = "no \"firebaseRef\" specified";
+    }
+    else if (firebaseRef instanceof Firebase === false) {
+      // TODO: can they pass in a limit query?
+      error = "\"firebaseRef\" must be an instance of Firebase";
+    }
+
+    if (typeof error !== "undefined") {
+      throw new Error("FireGrapher: " + error);
+    }
+  }
+
+  /**
+   * Validates the inputted CSS selector.
+   *
+   * @param {string} cssSelector The CSS selector to validate.
+   */
+  function _validateCssSelector(cssSelector) {
+    var error;
+    if (typeof cssSelector === "undefined") {
+      error = "no \"cssSelector\" specified";
+    }
+    else if (typeof cssSelector !== "string") {
+      error = "\"cssSelector\" must be a string";
+    }
+    else {
+      var matchedElements = document.querySelectorAll(cssSelector);
+      if (matchedElements.length === 0) {
+        error = "no element matches the CSS selector '" + cssSelector + "'";
+      }
+      else if (matchedElements.length > 1) {
+        error = "multiple elements (" + matchedElements.length + " total) match the CSS selector '" + cssSelector + "'";
+      }
+    }
+
+    if (typeof error !== "undefined") {
+      throw new Error("FireGrapher: " + error);
+    }
+  }
+
+  /**
    *  Validates the inputted config object and makes sure no options have invalid values.
    *
-   *  param {config} A list of options and styles which explain what the graph and how to style the graph.
+   *  @param {object} config The graph configuration object to validate.
    */
   function _validateConfig(config) {
+    // TODO: upgrade
+    var error;
+
+    if (typeof config === "undefined") {
+      error = "no \"config\" specified";
+    }
+
     // Every config needs to specify the graph type
     var validGraphTypes = ["table", "line", "scatter", "bar", "map"];
     if (typeof config.type === "undefined") {
-      throw new Error("No graph \"type\" specified. Must be \"table\", \"line\", or \"scatter\"");
+      error = "no graph \"type\" specified. Must be \"table\", \"line\", or \"scatter\"";
     }
     if (validGraphTypes.indexOf(config.type) === -1) {
-      throw new Error("Invalid graph \"type\" specified. Must be \"table\", \"line\", or \"scatter\"");
+      error = "Invalid graph \"type\" specified. Must be \"table\", \"line\", or \"scatter\"";
     }
 
     // Every config needs to specify the path to an individual record
     if (typeof config.path === "undefined") {
-      throw new Error("No \"path\" to individual record specified.");
+      error = "no \"path\" to individual record specified";
     }
     // TODO: other validation for things like $, *, etc.
 
@@ -49,38 +152,42 @@ var FireGrapher = function() {
             typeof config.marker.latitude === "undefined" ||
             typeof config.marker.longitude === "undefined" ||
             typeof config.marker.magnitude === "undefined") {
-          throw new Error("Incomplete \"marker\" definition specified. \nExpected: " + JSON.stringify(_getDefaultConfig().marker) + "\nActual: " + JSON.stringify(config.marker));
+          error = "incomplete \"marker\" definition specified. \nExpected: " + JSON.stringify(_getDefaultConfig().marker) + "\nActual: " + JSON.stringify(config.marker);
         }
         break;
       case "table":
         // Every table config needs to specify its column labels and values
         if (typeof config.columns === "undefined") {
-          throw new Error("No table \"columns\" specified.");
+          error = "no table \"columns\" specified";
         }
         config.columns.forEach(function(column) {
           if (typeof column.label === "undefined") {
-            throw new Error("Missing \"columns\" label.");
+            error = "missing \"columns\" label";
           }
           if (typeof column.value === "undefined") {
-            throw new Error("Missing \"columns\" value.");
+            error = "missing \"columns\" value";
           }
         });
         break;
       case "line":
         if (typeof config.xCoord === "undefined") {
-          throw new Error("No \"xCoord\" specified.");
+          error = "no \"xCoord\" specified";
         }
         if (typeof config.yCoord === "undefined") {
-          throw new Error("No \"yCoord\" specified.");
+          error = "no \"yCoord\" specified.";
         }
         break;
       case "bar":
         if (typeof config.value === "undefined") {
-          throw new Error("No \"value\" specified.");
+          error = "no \"value\" specified.";
         }
         break;
       case "scatter":
         break;
+    }
+
+    if (typeof error !== "undefined") {
+      throw new Error("FireGrapher: " + error);
     }
   }
 
@@ -181,65 +288,6 @@ var FireGrapher = function() {
       //outputConfig[key] = outputConfig[key] || defaultConfig[key];
     }
   }
-
-  /********************/
-  /*  PUBLIC METHODS  */
-  /********************/
-  /**
-   * Creates a d3 graph of the data at firebaseRef according to the config options.
-   *
-   * param {string} cssSelector A unique CSS selector which will own the graph.
-   * param {object} firebaseRef A Firebase reference to the data that will be graphed.
-   * param {object} config A list of options and styles which explain what the graph and how to style the graph.
-   */
-  this.graph = function (cssSelector, firebaseRef, config) {
-    // TODO: Validate inputs
-
-    // Validate the passed config and set appropriate defaults
-    _validateConfig(config);
-
-    // Recursively loop through the global config object and set any unspecified options
-    // to their default values
-    _recursivelySetDefaults(config, _getDefaultConfig());
-    var el = document.querySelector(cssSelector);
-    config.styles.size = {
-      width: el.clientWidth,
-      height: el.clientHeight
-    };
-
-    var d3Grapher;
-    switch(config.type) {
-      case "line":
-      case "scatter":
-      case "bar":
-        d3Grapher = new D3Graph(config, cssSelector);
-        break;
-      case "map":
-        d3Grapher = new D3Map(config, cssSelector);
-        break;
-      case "table":
-        d3Grapher = new D3Table(config, cssSelector);
-        break;
-      default:
-        throw new Error("Invalid config type: " + config.type);
-    }
-
-    // Initialize the graph
-    d3Grapher.init();
-
-    var parser = new FireGrapherParser(firebaseRef, config, d3Grapher);
-
-    var initialPathsToRecods = [{
-      "path": "/",
-      "params": {}
-    }];
-    parser.parsePath(initialPathsToRecods, 0);
-    //_parsePath(pathDicts, 0);
-  };
-
-  /*****************/
-  /*  CONSTRUCTOR  */
-  /*****************/
 };
 /**
  * Creates a FireGrapherParser instance.

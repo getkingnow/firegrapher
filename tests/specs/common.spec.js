@@ -9,6 +9,19 @@ var demoFirebaseUrl = "https://" + generateRandomString() + ".firebaseio-demo.co
 
 // Define examples of valid and invalid parameters
 var invalidFirebaseRefs = [null, undefined, true, false, [], {}, 0, 5, "", "a", {a:1}, ["hi", 1]];
+var validCssSelectors = ["#graph1", "#graph2", "#graph3"];
+var invalidCssSelectors = [".graph", "div", "#graph0", null, undefined, true, false, [], {}, 0, 5, "", "a"];
+var validConfig = {
+  type : "line",
+  path: "*",
+  xCoord: {
+    "value" : "time"
+  },
+  yCoord: {
+    "value" : "price"
+  },
+  series: "symbol"
+};
 
 /**********************/
 /*  HELPER FUNCTIONS  */
