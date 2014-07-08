@@ -480,7 +480,7 @@ var D3Graph = function(config, cssSelector) {
       .attr("cy", function(dataPoint) {
         return _yScale(dataPoint.yCoord);
       })
-      .attr("r", _config.styles.markers.size)
+      .attr("r", _config.styles.markers.size);
   }
 
   function _drawBar(series, barData) {
