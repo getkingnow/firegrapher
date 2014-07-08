@@ -7,52 +7,6 @@
    * param {object} config A collection of graph configuration options.
    */
 var FireGrapher = function(firebaseRef, cssSelector, config) {
-  /*****************/
-  /*  CONSTRUCTOR  */
-  /*****************/
-  // Validate the inputs
-  _validateFirebaseRef(firebaseRef);
-  _validateCssSelector(cssSelector);
-  _validateConfig(config);
-
-  // Recursively loop through the global config object and set any unspecified options
-  // to their default values
-  _recursivelySetDefaults(config, _getDefaultConfig());
-  var el = document.querySelector(cssSelector);
-  config.styles.size = {
-    width: el.clientWidth,
-    height: el.clientHeight
-  };
-
-  var d3Grapher;
-  switch(config.type) {
-    case "line":
-    case "scatter":
-    case "bar":
-      d3Grapher = new D3Graph(config, cssSelector);
-      break;
-    case "map":
-      d3Grapher = new D3Map(config, cssSelector);
-      break;
-    case "table":
-      d3Grapher = new D3Table(config, cssSelector);
-      break;
-    default:
-      throw new Error("Invalid config type: " + config.type);
-  }
-
-  // Initialize the graph
-  d3Grapher.init();
-
-  var parser = new FireGrapherParser(firebaseRef, config, d3Grapher);
-
-  var initialPathsToRecods = [{
-    "path": "/",
-    "params": {}
-  }];
-  parser.parsePath(initialPathsToRecods, 0);
-  //_parsePath(pathDicts, 0);
-
   /********************/
   /*  PRIVATE METHODS */
   /********************/
@@ -186,7 +140,7 @@ var FireGrapher = function(firebaseRef, cssSelector, config) {
     var defaultFillColors = ["#28E1BC", "#ED7469", "#B07CC6", "#5FAEE3", "#F4D03F", "#FF6607", "#54D98B", "#EB9850", "#3E5771", "#D65448"];
 
     // Define a default config object
-    var configDefaults = {
+    return {
       "styles": {
         "fillColor": "#DDDDDD",
         "fillOpacity": 0.3,
@@ -252,8 +206,6 @@ var FireGrapher = function(firebaseRef, cssSelector, config) {
         "magnitude" : "radius"
       }
     };
-
-    return configDefaults;
   }
 
   /**
@@ -273,4 +225,53 @@ var FireGrapher = function(firebaseRef, cssSelector, config) {
       //outputConfig[key] = outputConfig[key] || defaultConfig[key];
     }
   }
+
+  /*****************/
+  /*  CONSTRUCTOR  */
+  /*****************/
+  // Validate the inputs
+  _validateFirebaseRef(firebaseRef);
+  _validateCssSelector(cssSelector);
+  _validateConfig(config);
+
+  // Recursively loop through the global config object and set any unspecified options
+  // to their default values
+  _recursivelySetDefaults(config, _getDefaultConfig());
+  var el = document.querySelector(cssSelector);
+  config.styles.size = {
+    width: el.clientWidth,
+    height: el.clientHeight
+  };
+
+  var d3Grapher;
+  switch(config.type) {
+    case "line":
+    case "scatter":
+    case "bar":
+      d3Grapher = new D3Graph(config, cssSelector);
+      break;
+    case "map":
+      d3Grapher = new D3Map(config, cssSelector);
+      break;
+    case "table":
+      d3Grapher = new D3Table(config, cssSelector);
+      break;
+    default:
+      throw new Error("Invalid config type: " + config.type);
+  }
+
+  // Initialize the graph
+  d3Grapher.init();
+
+  var parser = new FireGrapherParser(firebaseRef, config, d3Grapher);
+
+  var initialPathsToRecords = [{
+    "path": "/",
+    "params": {}
+  }];
+  parser.parsePath(initialPathsToRecords, 0);
+
+  //console.log(initialPathsToRecords);
+  //_parsePath(pathDicts, 0);
+
 };

@@ -13,33 +13,90 @@ if (typeof module !== "undefined" && typeof process !== "undefined") {
 var FireGrapher = (function() {
   "use strict";
 /**
- * Creates a FireGrapher instance.
- *
- * @constructor
- * @this {FireGrapher}
- */
-var FireGrapher = function() {
+   * Creates a d3 graph of the data at firebaseRef according to the config options
+   * and places it in the element specified by the inputted CSS selector.
+   *
+   * param {Firebase} firebaseRef A Firebase reference to the data that will be graphed.
+   * param {string} cssSelector A unique CSS selector whose corresponding element will hold the graph.
+   * param {object} config A collection of graph configuration options.
+   */
+var FireGrapher = function(firebaseRef, cssSelector, config) {
   /********************/
   /*  PRIVATE METHODS */
   /********************/
   /**
+   * Validates the inputted Firebase reference.
+   *
+   * @param {Firebase} firebaseRef The Firebase reference to validate.
+   */
+  function _validateFirebaseRef(firebaseRef) {
+    var error;
+    if (typeof firebaseRef === "undefined") {
+      error = "no \"firebaseRef\" specified";
+    }
+    else if (firebaseRef instanceof Firebase === false) {
+      // TODO: can they pass in a limit query?
+      error = "\"firebaseRef\" must be an instance of Firebase";
+    }
+
+    if (typeof error !== "undefined") {
+      throw new Error("FireGrapher: " + error);
+    }
+  }
+
+  /**
+   * Validates the inputted CSS selector.
+   *
+   * @param {string} cssSelector The CSS selector to validate.
+   */
+  function _validateCssSelector(cssSelector) {
+    var error;
+    if (typeof cssSelector === "undefined") {
+      error = "no \"cssSelector\" specified";
+    }
+    else if (typeof cssSelector !== "string") {
+      error = "\"cssSelector\" must be a string";
+    }
+    else {
+      var matchedElements = document.querySelectorAll(cssSelector);
+      if (matchedElements.length === 0) {
+        error = "no element matches the CSS selector '" + cssSelector + "'";
+      }
+      else if (matchedElements.length > 1) {
+        error = "multiple elements (" + matchedElements.length + " total) match the CSS selector '" + cssSelector + "'";
+      }
+    }
+
+    if (typeof error !== "undefined") {
+      throw new Error("FireGrapher: " + error);
+    }
+  }
+
+  /**
    *  Validates the inputted config object and makes sure no options have invalid values.
    *
-   *  param {config} A list of options and styles which explain what the graph and how to style the graph.
+   *  @param {object} config The graph configuration object to validate.
    */
   function _validateConfig(config) {
+    // TODO: upgrade
+    var error;
+
+    if (typeof config === "undefined") {
+      error = "no \"config\" specified";
+    }
+
     // Every config needs to specify the graph type
     var validGraphTypes = ["table", "line", "scatter", "bar", "map"];
     if (typeof config.type === "undefined") {
-      throw new Error("No graph \"type\" specified. Must be \"table\", \"line\", or \"scatter\"");
+      error = "no graph \"type\" specified. Must be \"table\", \"line\", or \"scatter\"";
     }
     if (validGraphTypes.indexOf(config.type) === -1) {
-      throw new Error("Invalid graph \"type\" specified. Must be \"table\", \"line\", or \"scatter\"");
+      error = "Invalid graph \"type\" specified. Must be \"table\", \"line\", or \"scatter\"";
     }
 
     // Every config needs to specify the path to an individual record
     if (typeof config.path === "undefined") {
-      throw new Error("No \"path\" to individual record specified.");
+      error = "no \"path\" to individual record specified";
     }
     // TODO: other validation for things like $, *, etc.
 
@@ -49,38 +106,42 @@ var FireGrapher = function() {
             typeof config.marker.latitude === "undefined" ||
             typeof config.marker.longitude === "undefined" ||
             typeof config.marker.magnitude === "undefined") {
-          throw new Error("Incomplete \"marker\" definition specified. \nExpected: " + JSON.stringify(_getDefaultConfig().marker) + "\nActual: " + JSON.stringify(config.marker));
+          error = "incomplete \"marker\" definition specified. \nExpected: " + JSON.stringify(_getDefaultConfig().marker) + "\nActual: " + JSON.stringify(config.marker);
         }
         break;
       case "table":
         // Every table config needs to specify its column labels and values
         if (typeof config.columns === "undefined") {
-          throw new Error("No table \"columns\" specified.");
+          error = "no table \"columns\" specified";
         }
         config.columns.forEach(function(column) {
           if (typeof column.label === "undefined") {
-            throw new Error("Missing \"columns\" label.");
+            error = "missing \"columns\" label";
           }
           if (typeof column.value === "undefined") {
-            throw new Error("Missing \"columns\" value.");
+            error = "missing \"columns\" value";
           }
         });
         break;
       case "line":
         if (typeof config.xCoord === "undefined") {
-          throw new Error("No \"xCoord\" specified.");
+          error = "no \"xCoord\" specified";
         }
         if (typeof config.yCoord === "undefined") {
-          throw new Error("No \"yCoord\" specified.");
+          error = "no \"yCoord\" specified.";
         }
         break;
       case "bar":
         if (typeof config.value === "undefined") {
-          throw new Error("No \"value\" specified.");
+          error = "no \"value\" specified.";
         }
         break;
       case "scatter":
         break;
+    }
+
+    if (typeof error !== "undefined") {
+      throw new Error("FireGrapher: " + error);
     }
   }
 
@@ -93,7 +154,7 @@ var FireGrapher = function() {
     var defaultFillColors = ["#28E1BC", "#ED7469", "#B07CC6", "#5FAEE3", "#F4D03F", "#FF6607", "#54D98B", "#EB9850", "#3E5771", "#D65448"];
 
     // Define a default config object
-    var configDefaults = {
+    return {
       "styles": {
         "fillColor": "#DDDDDD",
         "fillOpacity": 0.3,
@@ -159,8 +220,6 @@ var FireGrapher = function() {
         "magnitude" : "radius"
       }
     };
-
-    return configDefaults;
   }
 
   /**
@@ -181,64 +240,54 @@ var FireGrapher = function() {
     }
   }
 
-  /********************/
-  /*  PUBLIC METHODS  */
-  /********************/
-  /**
-   * Creates a d3 graph of the data at firebaseRef according to the config options.
-   *
-   * param {string} cssSelector A unique CSS selector which will own the graph.
-   * param {object} firebaseRef A Firebase reference to the data that will be graphed.
-   * param {object} config A list of options and styles which explain what the graph and how to style the graph.
-   */
-  this.graph = function (cssSelector, firebaseRef, config) {
-    // TODO: Validate inputs
-
-    // Validate the passed config and set appropriate defaults
-    _validateConfig(config);
-
-    // Recursively loop through the global config object and set any unspecified options
-    // to their default values
-    _recursivelySetDefaults(config, _getDefaultConfig());
-    var el = document.querySelector(cssSelector);
-    config.styles.size = {
-      width: el.clientWidth,
-      height: el.clientHeight
-    };
-
-    var d3Grapher;
-    switch(config.type) {
-      case "line":
-      case "scatter":
-      case "bar":
-        d3Grapher = new D3Graph(config, cssSelector);
-        break;
-      case "map":
-        d3Grapher = new D3Map(config, cssSelector);
-        break;
-      case "table":
-        d3Grapher = new D3Table(config, cssSelector);
-        break;
-      default:
-        throw new Error("Invalid config type: " + config.type);
-    }
-
-    // Initialize the graph
-    d3Grapher.init();
-
-    var parser = new FireGrapherParser(firebaseRef, config, d3Grapher);
-
-    var initialPathsToRecods = [{
-      "path": "/",
-      "params": {}
-    }];
-    parser.parsePath(initialPathsToRecods, 0);
-    //_parsePath(pathDicts, 0);
-  };
-
   /*****************/
   /*  CONSTRUCTOR  */
   /*****************/
+  // Validate the inputs
+  _validateFirebaseRef(firebaseRef);
+  _validateCssSelector(cssSelector);
+  _validateConfig(config);
+
+  // Recursively loop through the global config object and set any unspecified options
+  // to their default values
+  _recursivelySetDefaults(config, _getDefaultConfig());
+  var el = document.querySelector(cssSelector);
+  config.styles.size = {
+    width: el.clientWidth,
+    height: el.clientHeight
+  };
+
+  var d3Grapher;
+  switch(config.type) {
+    case "line":
+    case "scatter":
+    case "bar":
+      d3Grapher = new D3Graph(config, cssSelector);
+      break;
+    case "map":
+      d3Grapher = new D3Map(config, cssSelector);
+      break;
+    case "table":
+      d3Grapher = new D3Table(config, cssSelector);
+      break;
+    default:
+      throw new Error("Invalid config type: " + config.type);
+  }
+
+  // Initialize the graph
+  d3Grapher.init();
+
+  var parser = new FireGrapherParser(firebaseRef, config, d3Grapher);
+
+  var initialPathsToRecords = [{
+    "path": "/",
+    "params": {}
+  }];
+  parser.parsePath(initialPathsToRecords, 0);
+
+  //console.log(initialPathsToRecords);
+  //_parsePath(pathDicts, 0);
+
 };
 /**
  * Creates a FireGrapherParser instance.
@@ -247,116 +296,27 @@ var FireGrapher = function() {
  * @this {FireGrapherParser}
  * @param {Firebase} firebaseRef A Firebase reference from where the FireGrapher data will be read.
  * @param {object} config A list of options and styles which explain what the graph and how to style the graph.
- * @param {FireGrapherD3} d3Grapher Grapher instance used to draw via d3.
+ * @param {FireGrapherD3} grapher Grapher instance used to draw the data.
  */
-var FireGrapherParser = function(firebaseRef, config, d3Grapher) {
-  /********************/
-  /*  PRIVATE METHODS */
-  /********************/
-  function _listenForNewRecords(pathDict, eventToListenTo) {
-    _firebaseRef.child(pathDict.path).on(eventToListenTo, function(childSnapshot) {
-      var data = childSnapshot.val();
-      var series;
+var FireGrapherParser = function(firebaseRef, config, grapher) {
+  /*****************/
+  /*  CONSTRUCTOR  */
+  /*****************/
+  var _firebaseRef = firebaseRef;
+  var _config = config;
+  var _this = this;
 
-      var newDataPoint;
+  this.pathsToRecords = [];
 
-      switch (_config.type) {
-        case "map":
-          newDataPoint = {
-            "path": pathDict.path + childSnapshot.name(),
-            "label": data[_config.marker.label],
-            "radius": data[_config.marker.magnitude],
-            "latitude": parseFloat(data[_config.marker.latitude]),
-            "longitude": parseFloat(data[_config.marker.longitude])
-          };
-          break;
-        case "table":
-          newDataPoint = [];
-          _config.columns.forEach(function(column) {
-            newDataPoint.push((typeof data[column.value] !== "undefined") ? data[column.value].toString() : "");
-          });
-          break;
-        case "bar":
-          series = (_config.series[0] === "$") ? pathDict.params[_config.series] : data[_config.series];
-          newDataPoint = {
-            "path": pathDict.path + childSnapshot.name(),
-            "series": series,
-            "value": parseInt(data[_config.value])
-          };
-          break;
-        case "line":
-        case "scatter":
-          series = (_config.series[0] === "$") ? pathDict.params[_config.series] : data[_config.series];
-          var xCoord;
-          if (typeof _config.xCoord.stream !== "undefined" && _config.xCoord.stream) {
-            xCoord = (_d3Grapher.data[series] ? _d3Grapher.data[series].streamCount : 0);
-          }
-          else {
-            xCoord = parseInt(data[_config.xCoord.value]);
-          }
-          newDataPoint = {
-            "series": series,
-            "path": pathDict.path + childSnapshot.name(),
-            "xCoord": xCoord,
-            "yCoord": parseInt(data[_config.yCoord.value])
-          };
-          break;
-      }
+  // Parse the path to an individual record
+  var _pathToRecordTokens = _config.path.split("/");
 
-      _d3Grapher.addDataPoint(newDataPoint);
-    });
-  }
-
-  function _removeSeries(seriesName) {
-    switch (_config.type) {
-      case "bar":
-      case "line":
-      case "scatter":
-        delete _d3Grapher.data[seriesName];
-        // TODO: want to make it so that we can remove the current series and re-use its series color
-        // _d3Grapher.numSeries -= 1; // Doesn't work since only opens up the latest color, not the current series' color
-        break;
-    }
-
-    _d3Grapher.draw();
-  }
-
-  function _listenForRemovedRecords(pathDict) {
-    switch (_config.type) {
-      case "map":
-        _firebaseRef.child(pathDict.path).on("child_removed", function(childSnapshot) {
-          _d3Grapher.data.forEach(function(dataPoint, index) {
-            if (dataPoint.path === (pathDict.path + childSnapshot.name())) {
-              _d3Grapher.data.splice(index, 1);
-            }
-          });
-        });
-        break;
-      case "table":
-        break;
-      case "bar":
-      case "line":
-      case "scatter":
-        _firebaseRef.child(pathDict.path).on("child_removed", function(childSnapshot) {
-          var series = (_config.series[0] === "$") ? pathDict.params[_config.series] : childSnapshot.val()[_config.series];
-          _d3Grapher.data[series].values.forEach(function(dataPoint, index) {
-            if (dataPoint.path === (pathDict.path + childSnapshot.name())) {
-              var spliced = _d3Grapher.data[series].values.splice(index, 1);
-              if (_config.type === "bar") {
-                _d3Grapher.data[series].sum -= spliced;
-              }
-            }
-          });
-        });
-        break;
-    }
-
-    _d3Grapher.draw();
-  }
-
-  function _listenForChangedRecords() {
-    // TODO: implement
-  }
+  /*if (grapher instanceof D3Graph === false &&
+      grapher instanceof D3Table === false &&
+      grapher instanceof D3Map === false) {
+    throw new Error("FireGrapher: \"grapher\" must be an instance of FireGrapherD3");
+  }*/
+  var _grapher = grapher;
 
   /********************/
   /*  PUBLIC METHODS  */
@@ -445,26 +405,114 @@ var FireGrapherParser = function(firebaseRef, config, d3Grapher) {
     }
   };
 
-  /*****************/
-  /*  CONSTRUCTOR  */
-  /*****************/
-  if (firebaseRef instanceof Firebase === false) {
-    throw new Error("firebaseRef must be an instance of Firebase");
-    // TODO: can they pass in a limit query?
+  /********************/
+  /*  PRIVATE METHODS */
+  /********************/
+  function _listenForNewRecords(pathDict, eventToListenTo) {
+    _this.pathsToRecords.push(pathDict);
+    _firebaseRef.child(pathDict.path).on(eventToListenTo, function(childSnapshot) {
+      var data = childSnapshot.val();
+      var series;
+
+      var newDataPoint;
+
+      switch (_config.type) {
+        case "map":
+          newDataPoint = {
+            "path": pathDict.path + childSnapshot.name(),
+            "label": data[_config.marker.label],
+            "radius": data[_config.marker.magnitude],
+            "latitude": parseFloat(data[_config.marker.latitude]),
+            "longitude": parseFloat(data[_config.marker.longitude])
+          };
+          break;
+        case "table":
+          newDataPoint = [];
+          _config.columns.forEach(function(column) {
+            newDataPoint.push((typeof data[column.value] !== "undefined") ? data[column.value].toString() : "");
+          });
+          break;
+        case "bar":
+          series = (_config.series[0] === "$") ? pathDict.params[_config.series] : data[_config.series];
+          newDataPoint = {
+            "path": pathDict.path + childSnapshot.name(),
+            "series": series,
+            "value": parseInt(data[_config.value])
+          };
+          break;
+        case "line":
+        case "scatter":
+          series = (_config.series[0] === "$") ? pathDict.params[_config.series] : data[_config.series];
+          var xCoord;
+          if (typeof _config.xCoord.stream !== "undefined" && _config.xCoord.stream) {
+            xCoord = (_grapher.data[series] ? _grapher.data[series].streamCount : 0);
+          }
+          else {
+            xCoord = parseInt(data[_config.xCoord.value]);
+          }
+          newDataPoint = {
+            "series": series,
+            "path": pathDict.path + childSnapshot.name(),
+            "xCoord": xCoord,
+            "yCoord": parseInt(data[_config.yCoord.value])
+          };
+          break;
+      }
+
+      _grapher.addDataPoint(newDataPoint);
+    });
   }
-  var _firebaseRef = firebaseRef;
 
-  var _config = config;
+  function _removeSeries(seriesName) {
+    switch (_config.type) {
+      case "bar":
+      case "line":
+      case "scatter":
+        delete _grapher.data[seriesName];
+        // TODO: want to make it so that we can remove the current series and re-use its series color
+        // _grapher.numSeries -= 1; // Doesn't work since only opens up the latest color, not the current series' color
+        break;
+    }
 
-  // Parse the path to an individual record
-  var _pathToRecordTokens = _config.path.split("/");
-
-  if (d3Grapher instanceof D3Graph === false &&
-      d3Grapher instanceof D3Table === false &&
-      d3Grapher instanceof D3Map === false) {
-    throw new Error("d3Grapher must be an instance of FireGrapherD3");
+    _grapher.draw();
   }
-  var _d3Grapher = d3Grapher;
+
+  function _listenForRemovedRecords(pathDict) {
+    switch (_config.type) {
+      case "map":
+        _firebaseRef.child(pathDict.path).on("child_removed", function(childSnapshot) {
+          _grapher.data.forEach(function(dataPoint, index) {
+            if (dataPoint.path === (pathDict.path + childSnapshot.name())) {
+              _grapher.data.splice(index, 1);
+            }
+          });
+        });
+        break;
+      case "table":
+        break;
+      case "bar":
+      case "line":
+      case "scatter":
+        _firebaseRef.child(pathDict.path).on("child_removed", function(childSnapshot) {
+          var series = (_config.series[0] === "$") ? pathDict.params[_config.series] : childSnapshot.val()[_config.series];
+          _grapher.data[series].values.forEach(function(dataPoint, index) {
+            if (dataPoint.path === (pathDict.path + childSnapshot.name())) {
+              var spliced = _grapher.data[series].values.splice(index, 1);
+              if (_config.type === "bar") {
+                _grapher.data[series].sum -= spliced;
+              }
+            }
+          });
+        });
+        break;
+    }
+
+    _grapher.draw();
+  }
+
+  function _listenForChangedRecords() {
+    // TODO: implement
+  }
 };
 /**
  * Creates a D3Graph instance.
