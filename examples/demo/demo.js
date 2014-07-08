@@ -2,7 +2,26 @@ $(function() {
   /************/
   /*  GRAPHS  */
   /************/
-    var firebaseRef = new Firebase("https://FireGrapherStocks.firebaseIO-demo.com/");
+  var firebaseRef = new Firebase("https://FireGrapherStocks.firebaseIO-demo.com/");
+  // var fireGrapher1 = new FireGrapher(firebaseRef.child("stocks"), "#graph1", {
+  //   type : "line",
+  //   path: "$symbol/*",
+  //   title: "Price over Time (Stocks in USD)",
+  //   xCoord: {
+  //     "label" : "Time",
+  //     "value" : "time",
+  //     "min": 0,
+  //     "max": 30
+  //   },
+  //   yCoord: {
+  //     "label" : "Price",
+  //     "value" : "price",
+  //     "min": 40,
+  //     "max": 150
+  //   },
+  //   series: "$symbol"
+  // });
+
   var fireGrapher1 = new FireGrapher(firebaseRef.child("stocks"), "#graph1", {
     type : "line",
     path: "$symbol/*",
@@ -23,11 +42,169 @@ $(function() {
   });
 
 
+  var currentValue = 0;
+  setInterval(function() {
+    firebaseRef.child("math").set({
+      "sine": {
+        "value": Math.sin(currentValue) * 100
+      },
+      "cosine": {
+        "value": Math.cos(currentValue) * 100
+      }
+    });
+    currentValue += 0.1;
+  }, 100);
 
-
-  $("#graph1").fadeIn(1000, function() {
-    $(this).attr("style", "display: block");
+  var fireGrapher1 = new FireGrapher(firebaseRef.child("math"), "#graph4", {
+    type: "line",
+    path: "$function",
+    title: "Math Function Waves",
+    xCoord: {
+      "label" : "Time",
+      "stream" : true,
+      "limit": 30
+    },
+    yCoord: {
+      "label" : "Value",
+      "value" : "value"
+    },
+    series: "$function"
   });
+
+
+  var currentValue = 0;
+  setInterval(function() {
+    firebaseRef.child("math").set({
+      "sine": {
+        "value": Math.sin(currentValue) * 100
+      },
+      "cosine": {
+        "value": Math.cos(currentValue) * 100
+      }
+    });
+    currentValue += 0.1;
+  }, 100);
+
+  var fireGrapher2 = new FireGrapher(firebaseRef.child("stocks"), "#graph2", {
+    type : "scatter",
+    path: "$symbol/*",
+    title: "Price over Time (Stocks in USD)",
+    xCoord: {
+      "label" : "Time",
+      "value" : "time"
+    },
+    yCoord: {
+      "label" : "Price",
+      "value" : "price"
+    },
+    styles: {
+      "markers": {
+        "size": 15,
+        "style": "flat"
+      }
+    },
+    series: "$symbol"
+  });
+
+
+  var fireGrapher3 = new FireGrapher(firebaseRef.child("stocks"), "#graph3", {
+    type : "bar",
+    path: "$symbol/*",
+    xCoord: {
+      "label" : "Symbols"
+    },
+    yCoord: {
+      "label" : "Price (USD)"
+    },
+    styles: {
+      "size": {
+        "width": 500,
+        "height": 150
+      }
+    },
+    value : "price",
+    series: "$symbol"
+  });
+
+
+  function getRandomValue(min, max) {
+    return Math.ceil(Math.random() * (max - min)) + min;
+  };
+
+  function addStockPrice(path, symbol, time, price, grouped) {
+    if (grouped) {
+      firebaseRef.child(path + "/" + symbol).push({
+        "time": time,
+        "price": price
+      });
+    }
+    else {
+      firebaseRef.child(path).push({
+        "symbol": symbol,
+        "time": time,
+        "price": price
+      });
+    }
+  };
+
+  function removeGoogleStocks() {
+    firebaseRef.child("stocks/GOOG").remove();
+    firebaseRef.child("stocks2").on("child_added", function(snapshot) {
+      var data = snapshot.val();
+      if (data.symbol === "GOOG") {
+        snapshot.ref().remove();
+      }
+    });
+  };
+
+  function removeStocks(numStocksToRemove) {
+    var ref = new Firebase("https://FireGrapherStocks.firebaseIO-demo.com/stocks2");
+    ref.limit(10).on("child_added", function(snapshot) {
+      if (numStocksToRemove > 0) {
+        numStocksToRemove -= 1;
+        snapshot.ref().remove();
+      }
+      else {
+        ref.off("child_added");
+      }
+    });
+  };
+
+  function addYahooStocks() {
+    for (var i = 0; i < 30; ++i) {
+      addStockPrice("stocks", "YHOO", i, getRandomValue(5, 40), true);
+      addStockPrice("stocks2", "YHOO", i, getRandomValue(5, 40), false);
+    }
+  };
+
+  function resetFirebase() {
+    firebaseRef.remove(function() {
+      // Populate /stocks/
+      for (var i = 0; i < 30; ++i) {
+        addStockPrice("stocks", "MSFT", i, getRandomValue(50, 55), true);
+        addStockPrice("stocks", "AAPL", i, getRandomValue(40, 60), true);
+        addStockPrice("stocks", "GOOG", i, getRandomValue(0, 100), true);
+      }
+
+      // Populate /stock2/
+      for (var i = 0; i < 30; ++i) {
+        addStockPrice("stocks2", "MSFT", i, getRandomValue(50, 55), false);
+        addStockPrice("stocks2", "AAPL", i, getRandomValue(40, 60), false);
+        addStockPrice("stocks2", "GOOG", i, getRandomValue(0, 100), false);
+      }
+    });
+  };
+
+  document.getElementById("resetFirebaseButton").addEventListener("click", resetFirebase);
+  document.getElementById("addYahooStocksButton").addEventListener("click", addYahooStocks);
+  document.getElementById("removeGoogleStocksButton").addEventListener("click", removeGoogleStocks);
+  document.getElementById("removeStocksButton").addEventListener("click", function() { removeStocks(10) });
+
+
+
+
+
+
 
   /* Scroll animations */
   $(window).scroll(function(){
