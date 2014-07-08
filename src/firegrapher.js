@@ -68,6 +68,7 @@ var FireGrapher = function(firebaseRef, cssSelector, config) {
   var parser = new FireGrapherParser(firebaseRef, config, d3Grapher);
 
   var initialPathsToRecords = [{
+    "pathArray": [],
     "path": "/",
     "params": {}
   }];
