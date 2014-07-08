@@ -180,7 +180,7 @@ var FireGrapherParser = function(firebaseRef, config, grapher) {
       case "line":
       case "scatter":
         if (typeof _grapher.data[seriesName] !== 'undefined') {
-          _grapher.data[seriesName].values = [];  
+          _grapher.data[seriesName].values = [];
         }
         // TODO: want to make it so that we can remove the current series and re-use its series color
         // _grapher.numSeries -= 1; // Doesn't work since only opens up the latest color, not the current series' color
@@ -199,6 +199,7 @@ var FireGrapherParser = function(firebaseRef, config, grapher) {
               _grapher.data.splice(index, 1);
             }
           });
+          _grapher.draw();
         });
         break;
       case "table":
@@ -206,7 +207,10 @@ var FireGrapherParser = function(firebaseRef, config, grapher) {
       case "bar":
       case "line":
       case "scatter":
+        console.log(pathDict.path);
         _firebaseRef.child(pathDict.path).on("child_removed", function(childSnapshot) {
+          console.dir(_grapher.data);
+          console.log("child_removed");
           var series = (_config.series[0] === "$") ? pathDict.params[_config.series] : childSnapshot.val()[_config.series];
           _grapher.data[series].values.forEach(function(dataPoint, index) {
             if (dataPoint.path === (pathDict.path + childSnapshot.name())) {
@@ -216,11 +220,10 @@ var FireGrapherParser = function(firebaseRef, config, grapher) {
               }
             }
           });
+          _grapher.draw();
         });
         break;
     }
-
-    _grapher.draw();
   }
 
   function _listenForChangedRecords() {
