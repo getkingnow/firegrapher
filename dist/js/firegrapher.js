@@ -176,7 +176,7 @@ var FireGrapherParser = function(firebaseRef, config, grapher) {
               "path": pathDict.path + childSnapshot.name() + "/",
               "params": {}
             };
-            newPathDict.pathArray = [].concat(pathDict.pathArray)
+            newPathDict.pathArray = [].concat(pathDict.pathArray);
             newPathDict.pathArray.push(childSnapshot.name());
 
             // Create the params object for the new path dictionary
@@ -228,7 +228,7 @@ var FireGrapherParser = function(firebaseRef, config, grapher) {
   /********************/
   function _listenForNewRecords(pathDict, eventToListenTo) {
     _this.pathsToRecords.push(pathDict);
-    if (typeof _seriesListeners[pathDict.pathArray.join()] === 'undefined') {
+    if (typeof _seriesListeners[pathDict.pathArray.join()] === "undefined") {
       _seriesListeners[pathDict.pathArray.join()] = {};
     }
     _seriesListeners[pathDict.pathArray.join()][eventToListenTo] = _firebaseRef.child(pathDict.path).on(eventToListenTo, function(childSnapshot) {
@@ -288,19 +288,19 @@ var FireGrapherParser = function(firebaseRef, config, grapher) {
     switch (_config.type) {
       case "bar":
         delete _grapher.data[seriesName].aggregation;
+        break;
       case "line":
       case "scatter":
         delete _grapher.data[seriesName].values;
-        // remove all listeners for the series being removed
-        Object.keys(_seriesListeners[pathArray.join()]).forEach(function(eventType) {
-          var fn = _seriesListeners[pathArray.join()][eventType];
-          _firebaseRef.child(pathArray.join('/')).off(eventType, fn);
-        });
         // TODO: want to make it so that we can remove the current series and re-use its series color
         // _grapher.numSeries -= 1; // Doesn't work since only opens up the latest color, not the current series' color
         break;
     }
-
+    // remove all listeners for the series being removed
+    Object.keys(_seriesListeners[pathArray.join()]).forEach(function(eventType) {
+      var fn = _seriesListeners[pathArray.join()][eventType];
+      _firebaseRef.child(pathArray.join("/")).off(eventType, fn);
+    });
     _grapher.draw();
   }
 
@@ -321,10 +321,10 @@ var FireGrapherParser = function(firebaseRef, config, grapher) {
       case "bar":
       case "line":
       case "scatter":
-        if (typeof _seriesListeners[pathDict.pathArray.join()] === 'undefined') {
+        if (typeof _seriesListeners[pathDict.pathArray.join()] === "undefined") {
           _seriesListeners[pathDict.pathArray.join()] = {};
         }
-        _seriesListeners[pathDict.pathArray.join()]['child_removed'] = _firebaseRef.child(pathDict.path).on("child_removed", function(childSnapshot) {
+        _seriesListeners[pathDict.pathArray.join()].child_removed = _firebaseRef.child(pathDict.path).on("child_removed", function(childSnapshot) {
           var series = (_config.series[0] === "$") ? pathDict.params[_config.series] : childSnapshot.val()[_config.series];
           _grapher.data[series].values.forEach(function(dataPoint, index) {
             if (dataPoint.path === (pathDict.path + childSnapshot.name())) {
@@ -761,10 +761,10 @@ var D3Graph = function(config, cssSelector) {
             _drawBar(seriesIndex, seriesName, _this.data[seriesName].aggregation);
             break;
         }
-        if (typeof coordinates === 'undefined') {
+        if (typeof coordinates === "undefined") {
           // coordinates have been removed, delete the series
           delete _this.data[seriesName];
-          if (_config.type === 'bar') {
+          if (_config.type === "bar") {
             // update xDomain to remove empty bar and redraw
             _xScale.domain(Object.keys(_this.data));
             _this.draw();
@@ -1077,7 +1077,7 @@ var D3Graph = function(config, cssSelector) {
   }
 
   function _drawBar(seriesIndex, seriesName, value) {
-    if (typeof value !== 'undefined') {
+    if (typeof value !== "undefined") {
       if (_graph.selectAll(".fg-bar .fg-series-" + seriesIndex).empty()) {
         // bar doesn't exist for series, add it
         _graph

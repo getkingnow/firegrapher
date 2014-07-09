@@ -181,10 +181,10 @@ var D3Graph = function(config, cssSelector) {
             _drawBar(seriesIndex, seriesName, _this.data[seriesName].aggregation);
             break;
         }
-        if (typeof coordinates === 'undefined') {
+        if (typeof coordinates === "undefined") {
           // coordinates have been removed, delete the series
           delete _this.data[seriesName];
-          if (_config.type === 'bar') {
+          if (_config.type === "bar") {
             // update xDomain to remove empty bar and redraw
             _xScale.domain(Object.keys(_this.data));
             _this.draw();
@@ -497,7 +497,7 @@ var D3Graph = function(config, cssSelector) {
   }
 
   function _drawBar(seriesIndex, seriesName, value) {
-    if (typeof value !== 'undefined') {
+    if (typeof value !== "undefined") {
       if (_graph.selectAll(".fg-bar .fg-series-" + seriesIndex).empty()) {
         // bar doesn't exist for series, add it
         _graph
