@@ -2,7 +2,8 @@
   "name": "firegrapher",
   "description": "Graphing library for Firebase",
   "version": "1.0.0",
-  "main": "./dist/firegrapher.min.js",
+  "author": "Firebase <support@firebase.com> (https://www.firebase.com/)",
+  "homepage": "https://github.com/firebase/firegrapher/",
   "repository": {
     "type": "git",
     "url": "https://github.com/firebase/firegrapher.git"
@@ -15,6 +16,20 @@
       "type": "MIT",
       "url": "http://firebase.mit-license.org/"
     }
+  ],
+  "keywords": [
+    "d3",
+    "graph",
+    "chart",
+    "realtime",
+    "firebase",
+    "visualization"
+  ],
+  "main": "./dist/firegrapher.min.js",
+  "files": [
+    "dist/**",
+    "README.md",
+    "CHANGELOG.md"
   ],
   "dependencies": {
     "d3": "^3.4.9",
