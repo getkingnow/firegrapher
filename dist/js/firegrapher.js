@@ -604,8 +604,8 @@ var D3Graph = function(config, cssSelector) {
    */
   this.init = function() {
     this.data = {};
-    _xDomain = { min: 0, max: 0 };
-    _yDomain = { min: 0, max: 0 };
+    _xDomain = { min: _config.xCoord.min, max: _config.xCoord.max };
+    _yDomain = { min: _config.yCoord.min, max: _config.yCoord.max };
     _numSeries = 0;
 
     if (_config.type === "bar") {
