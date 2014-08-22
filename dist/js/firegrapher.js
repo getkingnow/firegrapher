@@ -269,13 +269,13 @@ var FireGrapherParser = function(firebaseRef, config, grapher) {
             xCoord = (_grapher.data[series] ? _grapher.data[series].streamCount : 0);
           }
           else {
-            xCoord = parseInt(data[_config.xCoord.value]);
+            xCoord = parseFloat(data[_config.xCoord.value]);
           }
           newDataPoint = {
             "series": series,
             "path": pathDict.path + childSnapshot.name(),
             "xCoord": xCoord,
-            "yCoord": parseInt(data[_config.yCoord.value])
+            "yCoord": parseFloat(data[_config.yCoord.value])
           };
           break;
       }
