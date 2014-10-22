@@ -19,7 +19,7 @@
     "firebase",
     "visualization"
   ],
-  "main": "dist/firegrapher.min.js",
+  "main": "dist/firegrapher.js",
   "ignore": [
     "**/.*",
     "src",
